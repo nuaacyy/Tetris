@@ -43,50 +43,51 @@ import org.json.JSONObject;
 @Named
 @Singleton
 public class ArticleSearchUpdater extends AbstractEventListener<JSONObject> {
+	// 更新文章，此字段是从EventTypes移动至此
+	public static String UPDATE_ARTICLE = "Update Article";
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(ArticleSearchUpdater.class);
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOGGER = Logger.getLogger(ArticleSearchUpdater.class);
+	/**
+	 * Search management service.
+	 */
+	@Inject
+	private SearchMgmtService searchMgmtService;
 
-    /**
-     * Search management service.
-     */
-    @Inject
-    private SearchMgmtService searchMgmtService;
+	@Override
+	public void action(final Event<JSONObject> event) throws EventException {
+		final JSONObject data = event.getData();
+		LOGGER.log(Level.TRACE, "Processing an event [type={0}, data={1}]", event.getType(), data);
 
-    @Override
-    public void action(final Event<JSONObject> event) throws EventException {
-        final JSONObject data = event.getData();
-        LOGGER.log(Level.TRACE, "Processing an event [type={0}, data={1}]", event.getType(), data);
+		final JSONObject article = data.optJSONObject(Article.ARTICLE);
+		if (Article.ARTICLE_TYPE_C_DISCUSSION == article.optInt(Article.ARTICLE_TYPE)
+				|| Article.ARTICLE_TYPE_C_THOUGHT == article.optInt(Article.ARTICLE_TYPE)) {
+			return;
+		}
 
-        final JSONObject article = data.optJSONObject(Article.ARTICLE);
-        if (Article.ARTICLE_TYPE_C_DISCUSSION == article.optInt(Article.ARTICLE_TYPE)
-                || Article.ARTICLE_TYPE_C_THOUGHT == article.optInt(Article.ARTICLE_TYPE)) {
-            return;
-        }
+		final String tags = article.optString(Article.ARTICLE_TAGS);
+		if (StringUtils.containsIgnoreCase(tags, Tag.TAG_TITLE_C_SANDBOX)) {
+			return;
+		}
 
-        final String tags = article.optString(Article.ARTICLE_TAGS);
-        if (StringUtils.containsIgnoreCase(tags, Tag.TAG_TITLE_C_SANDBOX)) {
-            return;
-        }
+		if (Symphonys.getBoolean("algolia.enabled")) {
+			searchMgmtService.updateAlgoliaDocument(JSONs.clone(article));
+		}
 
-        if (Symphonys.getBoolean("algolia.enabled")) {
-            searchMgmtService.updateAlgoliaDocument(JSONs.clone(article));
-        }
+		if (Symphonys.getBoolean("es.enabled")) {
+			searchMgmtService.updateESDocument(JSONs.clone(article), Article.ARTICLE);
+		}
+	}
 
-        if (Symphonys.getBoolean("es.enabled")) {
-            searchMgmtService.updateESDocument(JSONs.clone(article), Article.ARTICLE);
-        }
-    }
-
-    /**
-     * Gets the event type {@linkplain EventTypes#UPDATE_ARTICLE}.
-     *
-     * @return event type
-     */
-    @Override
-    public String getEventType() {
-        return EventTypes.UPDATE_ARTICLE;
-    }
+	/**
+	 * Gets the event type {@linkplain EventTypes#UPDATE_ARTICLE}.
+	 *
+	 * @return event type
+	 */
+	@Override
+	public String getEventType() {
+		return UPDATE_ARTICLE;
+	}
 }

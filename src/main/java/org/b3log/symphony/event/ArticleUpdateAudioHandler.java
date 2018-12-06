@@ -39,36 +39,37 @@ import org.json.JSONObject;
 @Named
 @Singleton
 public class ArticleUpdateAudioHandler extends AbstractEventListener<JSONObject> {
+	// 更新文章，此字段是从EventTypes移动至此
+	public static String UPDATE_ARTICLE = "Update Article";
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(ArticleUpdateAudioHandler.class);
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOGGER = Logger.getLogger(ArticleUpdateAudioHandler.class);
+	/**
+	 * Article management service.
+	 */
+	@Inject
+	private ArticleMgmtService articleMgmtService;
 
-    /**
-     * Article management service.
-     */
-    @Inject
-    private ArticleMgmtService articleMgmtService;
+	/**
+	 * Gets the event type {@linkplain EventTypes#UPDATE_ARTICLE}.
+	 *
+	 * @return event type
+	 */
+	@Override
+	public String getEventType() {
+		return UPDATE_ARTICLE;
+	}
 
-    /**
-     * Gets the event type {@linkplain EventTypes#UPDATE_ARTICLE}.
-     *
-     * @return event type
-     */
-    @Override
-    public String getEventType() {
-        return EventTypes.UPDATE_ARTICLE;
-    }
+	@Override
+	public void action(final Event<JSONObject> event) throws EventException {
+		final JSONObject data = event.getData();
+		LOGGER.log(Level.TRACE, "Processing an event [type={0}, data={1}]", event.getType(), data);
 
-    @Override
-    public void action(final Event<JSONObject> event) throws EventException {
-        final JSONObject data = event.getData();
-        LOGGER.log(Level.TRACE, "Processing an event [type={0}, data={1}]", event.getType(), data);
+		final JSONObject originalArticle = data.optJSONObject(Article.ARTICLE);
+		final String authorId = originalArticle.optString(Article.ARTICLE_AUTHOR_ID);
 
-        final JSONObject originalArticle = data.optJSONObject(Article.ARTICLE);
-        final String authorId = originalArticle.optString(Article.ARTICLE_AUTHOR_ID);
-
-        articleMgmtService.genArticleAudio(originalArticle, authorId);
-    }
+		articleMgmtService.genArticleAudio(originalArticle, authorId);
+	}
 }

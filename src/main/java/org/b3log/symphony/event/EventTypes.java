@@ -26,12 +26,6 @@ package org.b3log.symphony.event;
  */
 public final class EventTypes {
 
-
-    /**
-     * Indicates a update article event.
-     */
-    public static final String UPDATE_ARTICLE = "Update Article";
-
     /**
      * Indicates an add comment to article event.
      */

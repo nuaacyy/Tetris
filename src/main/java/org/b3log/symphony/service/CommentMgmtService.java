@@ -33,7 +33,6 @@ import org.b3log.latke.service.LangPropsService;
 import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.service.annotation.Service;
 import org.b3log.latke.util.Ids;
-import org.b3log.symphony.event.EventTypes;
 import org.b3log.symphony.model.*;
 import org.b3log.symphony.repository.*;
 import org.b3log.symphony.util.Emotions;
@@ -55,6 +54,11 @@ import java.util.Locale;
 public class CommentMgmtService {
 	// 添加评论到文章字段，该字段是从EventTypes移动至此
 	public static final String ADD_COMMENT_TO_ARTICLE = "Add Comment";
+
+    /**
+     * Indicates a update article event.
+     */
+    public static final String UPDATE_COMMENT = "Update Comment";
 
     /**
      * Logger.
@@ -598,7 +602,7 @@ public class CommentMgmtService {
             eventData.put(Article.ARTICLE, article);
             eventData.put(Comment.COMMENT, comment);
             try {
-                eventManager.fireEventAsynchronously(new Event<>(EventTypes.UPDATE_COMMENT, eventData));
+                eventManager.fireEventAsynchronously(new Event<>(UPDATE_COMMENT, eventData));
             } catch (final EventException e) {
                 LOGGER.log(Level.ERROR, e.getMessage(), e);
             }

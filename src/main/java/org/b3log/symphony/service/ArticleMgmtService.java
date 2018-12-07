@@ -37,7 +37,6 @@ import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.service.annotation.Service;
 import org.b3log.latke.util.Ids;
 import org.b3log.latke.util.Strings;
-import org.b3log.symphony.event.EventTypes;
 import org.b3log.symphony.model.*;
 import org.b3log.symphony.repository.*;
 import org.b3log.symphony.util.*;

@@ -35,7 +35,9 @@
                             <img id="registerCaptchaImg" class="fn-pointer captcha-img " src="${servePath}/captcha" onclick="this.src = '${servePath}/captcha?' + (new Date()).getTime()" />
                             <input type="text" id="registerCaptcha" class="captcha-input" placeholder="${captchaLabel}" />
                         </div>
-                       
+    <div onclick="window.location='https://hacpai.com/oauth/wechat/redirect?goto=https://hacpai.com/'">
+       <div>使用 微信 进行注册</div>
+    </div>
                         <div id="registerTip" class="tip"></div>
                         <input id="referral" type="hidden" value="${referral}">
                         <button class="green" id="registerBtn" onclick="Verify.register()">${registerLabel}</button>

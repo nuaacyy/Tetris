@@ -53,6 +53,8 @@ import java.util.Locale;
  */
 @Service
 public class CommentMgmtService {
+	// 添加评论到文章字段，该字段是从EventTypes移动至此
+	public static final String ADD_COMMENT_TO_ARTICLE = "Add Comment";
 
     /**
      * Logger.
@@ -514,7 +516,7 @@ public class CommentMgmtService {
             eventData.put(UserExt.USER_COMMENT_VIEW_MODE, commentViewMode);
 
             try {
-                eventManager.fireEventAsynchronously(new Event<JSONObject>(EventTypes.ADD_COMMENT_TO_ARTICLE, eventData));
+                eventManager.fireEventAsynchronously(new Event<JSONObject>(ADD_COMMENT_TO_ARTICLE, eventData));
             } catch (final EventException e) {
                 LOGGER.log(Level.ERROR, e.getMessage(), e);
             }

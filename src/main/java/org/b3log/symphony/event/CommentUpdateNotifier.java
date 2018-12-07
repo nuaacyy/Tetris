@@ -42,6 +42,10 @@ import org.json.JSONObject;
 public class CommentUpdateNotifier extends AbstractEventListener<JSONObject> {
 
     /**
+     * Indicates a update article event.
+     */
+    public static final String UPDATE_COMMENT = "Update Comment";
+    /**
      * Logger.
      */
     private static final Logger LOGGER = Logger.getLogger(CommentUpdateNotifier.class);
@@ -71,12 +75,12 @@ public class CommentUpdateNotifier extends AbstractEventListener<JSONObject> {
     }
 
     /**
-     * Gets the event type {@linkplain EventTypes#UPDATE_COMMENT}.
+     * 
      *
      * @return event type
      */
     @Override
     public String getEventType() {
-        return EventTypes.UPDATE_COMMENT;
+        return UPDATE_COMMENT;
     }
 }

@@ -697,19 +697,10 @@ public class UserQueryService {
     }
 
     /**
-     * Gets a user by the specified user id.
-     *
-     * @param userId the specified user id
-     * @return for example,      <pre>
-     * {
-     *     "oId": "",
-     *     "userName": "",
-     *     "userEmail": "",
-     *     "userPassword": "",
-     *     ....
-     * }
-     * </pre>, returns {@code null} if not found
-     * @throws ServiceException service exception
+     * 通过用户id从数据库取到该用户
+     * @param userId
+     * @return
+     * @throws ServiceException
      */
     public JSONObject getUser(final String userId) throws ServiceException {
         try {

@@ -476,8 +476,10 @@ public class LoginProcessor {
     @After(adviceClass = {PermissionGrant.class, StopwatchEndAdvice.class})
     public void showRegister(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
             throws Exception {
-        if (null != userQueryService.getCurrentUser(request)
-                || userMgmtService.tryLogInWithCookie(request, response)) {
+    	JSONObject currentUser = userQueryService.getCurrentUser(request);
+    	boolean canLogInWithCookie = userMgmtService.tryLogInWithCookie(request, response);
+        if (null != currentUser
+                || canLogInWithCookie) {
             response.sendRedirect(Latkes.getServePath());
 
             return;

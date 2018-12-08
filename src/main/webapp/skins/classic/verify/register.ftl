@@ -35,9 +35,24 @@
                             <img id="registerCaptchaImg" class="fn-pointer captcha-img " src="${servePath}/captcha" onclick="this.src = '${servePath}/captcha?' + (new Date()).getTime()" />
                             <input type="text" id="registerCaptcha" class="captcha-input" placeholder="${captchaLabel}" />
                         </div>
-    <div onclick="window.location='https://hacpai.com/oauth/wechat/redirect?goto=https://hacpai.com/'">
-       <div>使用 微信 进行注册</div>
-    </div>
+                        
+					    <div onclick="window.location='https://hacpai.com/oauth/github/redirect?goto=https://hacpai.com/'">
+					        <img class="fn__none" src="https://static.hacpai.com/images/github.gif">
+					        <div>
+					            <b class="ft__black">使用 GitHub 进行注册</b>
+					            <ul><li>可参与 <a href="https://hacpai.com/top/github/repo">GitHub 排行榜</a></li><li>可免积分使用 <a href="https://hacpai.com/tag/bnd">BND2</a></li></ul>
+					        </div>
+					    </div>
+					    <div onclick="window.location='https://hacpai.com/oauth/weibo/redirect?goto=https://hacpai.com/'">
+					       <div>使用 新浪微博 进行注册</div>
+					    </div>
+					    <div onclick="window.location='https://hacpai.com/oauth/qq/redirect?goto=https://hacpai.com/'">
+					       <div>使用 QQ 进行注册</div>
+					    </div>
+					    <div onclick="window.location='https://hacpai.com/oauth/wechat/redirect?goto=https://hacpai.com/'">
+					       <div>使用 微信 进行注册</div>
+					    </div>
+    
                         <div id="registerTip" class="tip"></div>
                         <input id="referral" type="hidden" value="${referral}">
                         <button class="green" id="registerBtn" onclick="Verify.register()">${registerLabel}</button>

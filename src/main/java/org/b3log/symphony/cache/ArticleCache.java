@@ -29,8 +29,7 @@ import org.b3log.symphony.util.Symphonys;
 import org.json.JSONObject;
 
 /**
- * Article cache.
- * 文章缓存
+ * Article cache. 文章缓存
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @version 1.1.1.4, Jul 23, 2017
@@ -40,83 +39,83 @@ import org.json.JSONObject;
 @Singleton
 public class ArticleCache {
 
-    /**
-     * Article cache.
-     */
-    private static final Cache ARTICLE_CACHE = CacheFactory.getCache(Article.ARTICLES);
+	/**
+	 * Article cache.
+	 */
+	private static final Cache ARTICLE_CACHE = CacheFactory.getCache(Article.ARTICLES);
 
-    /**
-     * Article abstract cache.
-     */
-    private static final Cache ARTICLE_ABSTRACT_CACHE = CacheFactory.getCache(Article.ARTICLES + "_"
-            + Article.ARTICLE_T_PREVIEW_CONTENT);
+	/**
+	 * Article abstract cache.
+	 */
+	private static final Cache ARTICLE_ABSTRACT_CACHE = CacheFactory
+			.getCache(Article.ARTICLES + "_" + Article.ARTICLE_T_PREVIEW_CONTENT);
 
-    static {
-        ARTICLE_CACHE.setMaxCount(Symphonys.getInt("cache.articleCnt"));
-        ARTICLE_ABSTRACT_CACHE.setMaxCount(Symphonys.getInt("cache.articleCnt"));
-    }
+	static {
+		ARTICLE_CACHE.setMaxCount(Symphonys.getInt("cache.articleCnt"));
+		ARTICLE_ABSTRACT_CACHE.setMaxCount(Symphonys.getInt("cache.articleCnt"));
+	}
 
-    /**
-     * Gets an article abstract by the specified article id.
-     *
-     * @param articleId the specified article id
-     * @return article abstract, return {@code null} if not found
-     */
-    public String getArticleAbstract(final String articleId) {
-        final JSONObject value = ARTICLE_ABSTRACT_CACHE.get(articleId);
-        if (null == value) {
-            return null;
-        }
+	/**
+	 * Gets an article abstract by the specified article id.
+	 *
+	 * @param articleId the specified article id
+	 * @return article abstract, return {@code null} if not found
+	 */
+	public String getArticleAbstract(final String articleId) {
+		final JSONObject value = ARTICLE_ABSTRACT_CACHE.get(articleId);
+		if (null == value) {
+			return null;
+		}
 
-        return value.optString(Common.DATA);
-    }
+		return value.optString(Common.DATA);
+	}
 
-    /**
-     * Puts an article abstract by the specified article id and article abstract.
-     *
-     * @param articleId       the specified article id
-     * @param articleAbstract the specified article abstract
-     */
-    public void putArticleAbstract(final String articleId, final String articleAbstract) {
-        final JSONObject value = new JSONObject();
-        value.put(Common.DATA, articleAbstract);
-        ARTICLE_ABSTRACT_CACHE.put(articleId, value);
-    }
+	/**
+	 * Puts an article abstract by the specified article id and article abstract.
+	 *
+	 * @param articleId       the specified article id
+	 * @param articleAbstract the specified article abstract
+	 */
+	public void putArticleAbstract(final String articleId, final String articleAbstract) {
+		final JSONObject value = new JSONObject();
+		value.put(Common.DATA, articleAbstract);
+		ARTICLE_ABSTRACT_CACHE.put(articleId, value);
+	}
 
-    /**
-     * Gets an article by the specified article id.
-     *
-     * @param id the specified article id
-     * @return article, returns {@code null} if not found
-     */
-    public JSONObject getArticle(final String id) {
-        final JSONObject article = ARTICLE_CACHE.get(id);
-        if (null == article) {
-            return null;
-        }
+	/**
+	 * Gets an article by the specified article id.
+	 *
+	 * @param id the specified article id
+	 * @return article, returns {@code null} if not found
+	 */
+	public JSONObject getArticle(final String id) {
+		final JSONObject article = ARTICLE_CACHE.get(id);
+		if (null == article) {
+			return null;
+		}
 
-        return JSONs.clone(article);
-    }
+		return JSONs.clone(article);
+	}
 
-    /**
-     * Adds or updates the specified article.
-     *
-     * @param article the specified article
-     */
-    public void putArticle(final JSONObject article) {
-        final String articleId = article.optString(Keys.OBJECT_ID);
+	/**
+	 * Adds or updates the specified article.
+	 *
+	 * @param article the specified article
+	 */
+	public void putArticle(final JSONObject article) {
+		final String articleId = article.optString(Keys.OBJECT_ID);
 
-        ARTICLE_CACHE.put(articleId, JSONs.clone(article));
-        ARTICLE_ABSTRACT_CACHE.remove(articleId);
-    }
+		ARTICLE_CACHE.put(articleId, JSONs.clone(article));
+		ARTICLE_ABSTRACT_CACHE.remove(articleId);
+	}
 
-    /**
-     * Removes an article by the specified article id.
-     *
-     * @param id the specified article id
-     */
-    public void removeArticle(final String id) {
-        ARTICLE_CACHE.remove(id);
-        ARTICLE_ABSTRACT_CACHE.remove(id);
-    }
+	/**
+	 * Removes an article by the specified article id.
+	 *
+	 * @param id the specified article id
+	 */
+	public void removeArticle(final String id) {
+		ARTICLE_CACHE.remove(id);
+		ARTICLE_ABSTRACT_CACHE.remove(id);
+	}
 }

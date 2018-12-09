@@ -41,13 +41,13 @@ public final class Crypts {
 	 */
 	private static final Logger LOGGER = Logger.getLogger(Crypts.class);
 	/**
-	 * 使用到的演算法
+	 * AES演算法
 	 */
-	public static final String ALGORITHM = "AES";
+	public static final String ALGORITHM_AES = "AES";
 	/**
-	 * 编码规则
+	 * UTF-8编解码规则
 	 */
-	public static final String CHARSET = "UTF-8";
+	public static final String CHARSET_UTF_8 = "UTF-8";
 
 	/**
 	 * Encrypts by AES.
@@ -59,15 +59,15 @@ public final class Crypts {
 	 */
 	public static String encryptByAES(final String content, final String key) {
 		try {
-			final KeyGenerator kgen = KeyGenerator.getInstance(ALGORITHM);
+			final KeyGenerator kgen = KeyGenerator.getInstance(ALGORITHM_AES);
 			final SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
 			secureRandom.setSeed(key.getBytes());
 			kgen.init(128, secureRandom);
 			final SecretKey secretKey = kgen.generateKey();
 			final byte[] enCodeFormat = secretKey.getEncoded();
-			final SecretKeySpec keySpec = new SecretKeySpec(enCodeFormat, ALGORITHM);
-			final Cipher cipher = Cipher.getInstance(ALGORITHM);
-			final byte[] byteContent = content.getBytes(CHARSET);
+			final SecretKeySpec keySpec = new SecretKeySpec(enCodeFormat, ALGORITHM_AES);
+			final Cipher cipher = Cipher.getInstance(ALGORITHM_AES);
+			final byte[] byteContent = content.getBytes(CHARSET_UTF_8);
 			cipher.init(Cipher.ENCRYPT_MODE, keySpec);
 			final byte[] result = cipher.doFinal(byteContent);
 
@@ -94,18 +94,18 @@ public final class Crypts {
 		try {
 			final byte[] data = Hex.decodeHex(content.toCharArray());
 			// 实例化支持AES算法的密钥生成器（算法名称命名需按规定，否则抛出异常）
-			final KeyGenerator kgen = KeyGenerator.getInstance(ALGORITHM);
+			final KeyGenerator kgen = KeyGenerator.getInstance(ALGORITHM_AES);
 			final SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
 			secureRandom.setSeed(key.getBytes());
 			kgen.init(128, secureRandom);
 			final SecretKey secretKey = kgen.generateKey();
 			final byte[] enCodeFormat = secretKey.getEncoded();
-			final SecretKeySpec keySpec = new SecretKeySpec(enCodeFormat, ALGORITHM);
-			final Cipher cipher = Cipher.getInstance(ALGORITHM);
+			final SecretKeySpec keySpec = new SecretKeySpec(enCodeFormat, ALGORITHM_AES);
+			final Cipher cipher = Cipher.getInstance(ALGORITHM_AES);
 			cipher.init(Cipher.DECRYPT_MODE, keySpec);
 			final byte[] result = cipher.doFinal(data);
 
-			return new String(result, CHARSET);
+			return new String(result, CHARSET_UTF_8);
 		} catch (final Exception e) {
 			LOGGER.log(Level.WARN, "Decrypt failed");
 

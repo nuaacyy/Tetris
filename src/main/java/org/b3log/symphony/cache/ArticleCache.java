@@ -38,11 +38,15 @@ import org.json.JSONObject;
 @Named
 @Singleton
 public class ArticleCache {
+	/**
+	 * articles field
+	 */
+	public static final String ARTICLES = "articles";
 
 	/**
 	 * Article cache.
 	 */
-	private static final Cache ARTICLE_CACHE = CacheFactory.getCache(Article.ARTICLES);
+	private static final Cache ARTICLE_CACHE = CacheFactory.getCache(ARTICLES);
 
 	/**
 	 * Article abstract cache.

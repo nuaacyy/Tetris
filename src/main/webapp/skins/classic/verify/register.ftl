@@ -37,11 +37,7 @@
                         </div>
                         
 					    <div onclick="window.location='https://hacpai.com/oauth/github/redirect?goto=https://hacpai.com/'">
-					        <img class="fn__none" src="https://static.hacpai.com/images/github.gif">
-					        <div>
-					            <b class="ft__black">使用 GitHub 进行注册</b>
-					            <ul><li>可参与 <a href="https://hacpai.com/top/github/repo">GitHub 排行榜</a></li><li>可免积分使用 <a href="https://hacpai.com/tag/bnd">BND2</a></li></ul>
-					        </div>
+					       <div>使用 GitHub 进行注册</div>
 					    </div>
 					    <div onclick="window.location='https://hacpai.com/oauth/weibo/redirect?goto=https://hacpai.com/'">
 					       <div>使用 新浪微博 进行注册</div>

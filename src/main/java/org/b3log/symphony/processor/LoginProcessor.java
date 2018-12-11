@@ -851,10 +851,41 @@ public class LoginProcessor {
 	/**
 	 * quick register 快捷注册入口
 	 */
-	@RequestProcessing(value = "https://hacpai.com/oauth/github/redirect")
+	@RequestProcessing(value = "/oauth/github", method = HTTPRequestMethod.GET)
 	@Before(adviceClass = StopwatchStartAdvice.class)
 	@After(adviceClass = StopwatchEndAdvice.class)
-	public void quickRegister() {
-
+	public void quickRegisterByGithub() {
+		System.out.println("github");
 	}
+
+	/**
+	 * quick register 快捷注册入口
+	 */
+	@RequestProcessing(value = "/oauth/weibo", method = HTTPRequestMethod.GET)
+	@Before(adviceClass = StopwatchStartAdvice.class)
+	@After(adviceClass = StopwatchEndAdvice.class)
+	public void quickRegisterByWeiBo() {
+		System.out.println("weibo");
+	}
+
+	/**
+	 * quick register 快捷注册入口
+	 */
+	@RequestProcessing(value = "/oauth/qq", method = HTTPRequestMethod.GET)
+	@Before(adviceClass = StopwatchStartAdvice.class)
+	@After(adviceClass = StopwatchEndAdvice.class)
+	public void quickRegisterByQQ() {
+		System.out.println("qq");
+	}
+
+	/**
+	 * quick register 快捷注册入口
+	 */
+	@RequestProcessing(value = "/oauth/wechat", method = HTTPRequestMethod.GET)
+	@Before(adviceClass = StopwatchStartAdvice.class)
+	@After(adviceClass = StopwatchEndAdvice.class)
+	public void quickRegisterByWeChat() {
+		System.out.println("wechat");
+	}
+
 }

@@ -47,90 +47,91 @@ import java.net.URL;
 @Named
 @Singleton
 public class ArticleBaiduSender extends AbstractEventListener<JSONObject> {
-	//添加文章,此字段是从EventTypes移动至此
-			public static String ADD_ARTICLE = "Add Article";
+	// 添加文章,此字段是从EventTypes移动至此
+	public static String ADD_ARTICLE = "Add Article";
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOGGER = Logger.getLogger(ArticleBaiduSender.class);
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(ArticleBaiduSender.class);
 
-    /**
-     * Baidu data token.
-     */
-    private static final String TOKEN = Symphonys.get("baidu.data.token");
+	/**
+	 * Baidu data token.
+	 */
+	private static final String TOKEN = Symphonys.get("baidu.data.token");
 
-    /**
-     * Sends the specified URLs to Baidu.
-     *
-     * @param urls the specified URLs
-     */
-    public static void sendToBaidu(final String... urls) {
-        if (ArrayUtils.isEmpty(urls)) {
-            return;
-        }
+	/**
+	 * Sends the specified URLs to Baidu.
+	 *
+	 * @param urls the specified URLs
+	 */
+	public static void sendToBaidu(final String... urls) {
+		if (ArrayUtils.isEmpty(urls)) {
+			return;
+		}
 
-        new Thread(() -> {
-            try {
-                final URLFetchService urlFetchService = URLFetchServiceFactory.getURLFetchService();
+		new Thread(() -> {
+			try {
+				final URLFetchService urlFetchService = URLFetchServiceFactory.getURLFetchService();
 
-                final HTTPRequest request = new HTTPRequest();
-                request.setURL(new URL("http://data.zz.baidu.com/urls?site=" + Latkes.getServerHost() + "&token=" + TOKEN));
-                request.setRequestMethod(HTTPRequestMethod.POST);
-                request.addHeader(new HTTPHeader(Common.USER_AGENT, "curl/7.12.1"));
-                request.addHeader(new HTTPHeader("Host", "data.zz.baidu.com"));
-                request.addHeader(new HTTPHeader("Content-Type", "text/plain"));
-                request.addHeader(new HTTPHeader("Connection", "close"));
+				final HTTPRequest request = new HTTPRequest();
+				request.setURL(
+						new URL("http://data.zz.baidu.com/urls?site=" + Latkes.getServerHost() + "&token=" + TOKEN));
+				request.setRequestMethod(HTTPRequestMethod.POST);
+				request.addHeader(new HTTPHeader(Common.USER_AGENT, "curl/7.12.1"));
+				request.addHeader(new HTTPHeader("Host", "data.zz.baidu.com"));
+				request.addHeader(new HTTPHeader("Content-Type", "text/plain"));
+				request.addHeader(new HTTPHeader("Connection", "close"));
 
-                final String urlsStr = StringUtils.join(urls, "\n");
-                request.setPayload(urlsStr.getBytes());
+				final String urlsStr = StringUtils.join(urls, "\n");
+				request.setPayload(urlsStr.getBytes());
 
-                final HTTPResponse response = urlFetchService.fetch(request);
-                LOGGER.info(new String(response.getContent(), "UTF-8"));
+				final HTTPResponse response = urlFetchService.fetch(request);
+				LOGGER.info(new String(response.getContent(), "UTF-8"));
 
-                LOGGER.debug("Sent [" + urlsStr + "] to Baidu");
-            } catch (final Exception e) {
-                LOGGER.log(Level.ERROR, "Ping Baidu spider failed", e);
-            }
-        }).start();
-    }
+				LOGGER.debug("Sent [" + urlsStr + "] to Baidu");
+			} catch (final Exception e) {
+				LOGGER.log(Level.ERROR, "Ping Baidu spider failed", e);
+			}
+		}).start();
+	}
 
-    @Override
-    public void action(final Event<JSONObject> event) throws EventException {
-        final JSONObject data = event.getData();
-        LOGGER.log(Level.TRACE, "Processing an event [type={0}, data={1}]", event.getType(), data);
+	@Override
+	public void action(final Event<JSONObject> event) throws EventException {
+		final JSONObject data = event.getData();
+		LOGGER.log(Level.TRACE, "Processing an event [type={0}, data={1}]", event.getType(), data);
 
-        if (Latkes.RuntimeMode.PRODUCTION != Latkes.getRuntimeMode() || StringUtils.isBlank(TOKEN)) {
-            return;
-        }
+		if (Latkes.RuntimeMode.PRODUCTION != Latkes.getRuntimeMode() || StringUtils.isBlank(TOKEN)) {
+			return;
+		}
 
-        try {
-            final JSONObject article = data.getJSONObject(Article.ARTICLE);
-            final int articleType = article.optInt(Article.ARTICLE_TYPE);
-            if (Article.ARTICLE_TYPE_C_DISCUSSION == articleType || Article.ARTICLE_TYPE_C_THOUGHT == articleType) {
-                return;
-            }
+		try {
+			final JSONObject article = data.getJSONObject(Article.ARTICLE);
+			final int articleType = article.optInt(Article.ARTICLE_TYPE);
+			if (Article.ARTICLE_TYPE_C_DISCUSSION == articleType || Article.ARTICLE_TYPE_C_THOUGHT == articleType) {
+				return;
+			}
 
-            final String tags = article.optString(Article.ARTICLE_TAGS);
-            if (StringUtils.containsIgnoreCase(tags, Tag.TAG_TITLE_C_SANDBOX)) {
-                return;
-            }
+			final String tags = article.optString(Article.ARTICLE_TAGS);
+			if (StringUtils.containsIgnoreCase(tags, Tag.TAG_TITLE_C_SANDBOX)) {
+				return;
+			}
 
-            final String articlePermalink = Latkes.getServePath() + article.optString(Article.ARTICLE_PERMALINK);
+			final String articlePermalink = Latkes.getServePath() + article.optString(Article.ARTICLE_PERMALINK);
 
-            sendToBaidu(articlePermalink);
-        } catch (final Exception e) {
-            LOGGER.log(Level.ERROR, "Sends the article to Baidu error", e);
-        }
-    }
+			sendToBaidu(articlePermalink);
+		} catch (final Exception e) {
+			LOGGER.log(Level.ERROR, "Sends the article to Baidu error", e);
+		}
+	}
 
-    /**
-     * Gets the event type {@linkplain EventTypes#ADD_ARTICLE}.
-     *
-     * @return event type
-     */
-    @Override
-    public String getEventType() {
-        return ADD_ARTICLE;
-    }
+	/**
+	 * Gets the event type {@linkplain EventTypes#ADD_ARTICLE}.
+	 *
+	 * @return event type
+	 */
+	@Override
+	public String getEventType() {
+		return ADD_ARTICLE;
+	}
 }

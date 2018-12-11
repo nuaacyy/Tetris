@@ -39,7 +39,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 /**
- * Sends an article to QQ qun via <a href="https://github.com/b3log/xiaov">XiaoV</a>.
+ * Sends an article to QQ qun via
+ * <a href="https://github.com/b3log/xiaov">XiaoV</a>.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @version 1.4.0.2, May 29, 2016
@@ -48,77 +49,76 @@ import java.net.URLEncoder;
 @Named
 @Singleton
 public class ArticleQQSender extends AbstractEventListener<JSONObject> {
-	//添加文章,此字段是从EventTypes移动至此
-			public static String ADD_ARTICLE = "Add Article";
+	// 添加文章,此字段是从EventTypes移动至此
+	public static String ADD_ARTICLE = "Add Article";
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOGGER = Logger.getLogger(ArticleQQSender.class);
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(ArticleQQSender.class);
 
-    /**
-     * URL fetch service.
-     */
-    private static final URLFetchService URL_FETCH_SVC = URLFetchServiceFactory.getURLFetchService();
+	/**
+	 * URL fetch service.
+	 */
+	private static final URLFetchService URL_FETCH_SVC = URLFetchServiceFactory.getURLFetchService();
 
-    @Override
-    public void action(final Event<JSONObject> event) throws EventException {
-        final JSONObject data = event.getData();
-        LOGGER.log(Level.TRACE, "Processing an event [type={0}, data={1}]", event.getType(), data);
+	@Override
+	public void action(final Event<JSONObject> event) throws EventException {
+		final JSONObject data = event.getData();
+		LOGGER.log(Level.TRACE, "Processing an event [type={0}, data={1}]", event.getType(), data);
 
-        if (!Symphonys.getBoolean("xiaov.enabled")) {
-            return;
-        }
+		if (!Symphonys.getBoolean("xiaov.enabled")) {
+			return;
+		}
 
-        try {
-            final JSONObject article = data.getJSONObject(Article.ARTICLE);
-            final int articleType = article.optInt(Article.ARTICLE_TYPE);
-            if (Article.ARTICLE_TYPE_C_DISCUSSION == articleType || Article.ARTICLE_TYPE_C_THOUGHT == articleType) {
-                return;
-            }
+		try {
+			final JSONObject article = data.getJSONObject(Article.ARTICLE);
+			final int articleType = article.optInt(Article.ARTICLE_TYPE);
+			if (Article.ARTICLE_TYPE_C_DISCUSSION == articleType || Article.ARTICLE_TYPE_C_THOUGHT == articleType) {
+				return;
+			}
 
-            final String title = article.optString(Article.ARTICLE_TITLE);
-            final String permalink = article.optString(Article.ARTICLE_PERMALINK);
-            final String msg = title + " " + Latkes.getServePath() + permalink;
-            sendToXiaoV(msg);
+			final String title = article.optString(Article.ARTICLE_TITLE);
+			final String permalink = article.optString(Article.ARTICLE_PERMALINK);
+			final String msg = title + " " + Latkes.getServePath() + permalink;
+			sendToXiaoV(msg);
 
-        } catch (final Exception e) {
-            LOGGER.log(Level.ERROR, "Sends the article to QQ group error", e);
-        }
-    }
+		} catch (final Exception e) {
+			LOGGER.log(Level.ERROR, "Sends the article to QQ group error", e);
+		}
+	}
 
-    private void sendToXiaoV(final String msg) {
-        final String xiaovAPI = Symphonys.get("xiaov.api");
-        final String xiaovKey = Symphonys.get("xiaov.key");
+	private void sendToXiaoV(final String msg) {
+		final String xiaovAPI = Symphonys.get("xiaov.api");
+		final String xiaovKey = Symphonys.get("xiaov.key");
 
-        final HTTPRequest request = new HTTPRequest();
-        request.setRequestMethod(HTTPRequestMethod.POST);
+		final HTTPRequest request = new HTTPRequest();
+		request.setRequestMethod(HTTPRequestMethod.POST);
 
-        try {
-            request.setURL(new URL(xiaovAPI + "/qq"));
+		try {
+			request.setURL(new URL(xiaovAPI + "/qq"));
 
-            final String body = "key=" + URLEncoder.encode(xiaovKey, "UTF-8")
-                    + "&msg=" + URLEncoder.encode(msg, "UTF-8")
-                    + "&user=" + URLEncoder.encode("sym", "UTF-8");
-            request.setPayload(body.getBytes("UTF-8"));
+			final String body = "key=" + URLEncoder.encode(xiaovKey, "UTF-8") + "&msg="
+					+ URLEncoder.encode(msg, "UTF-8") + "&user=" + URLEncoder.encode("sym", "UTF-8");
+			request.setPayload(body.getBytes("UTF-8"));
 
-            final HTTPResponse response = URL_FETCH_SVC.fetch(request);
-            final int sc = response.getResponseCode();
-            if (HttpServletResponse.SC_OK != sc) {
-                LOGGER.warn("Sends message to XiaoV status code is [" + sc + "]");
-            }
-        } catch (final Exception e) {
-            LOGGER.log(Level.ERROR, "Sends message to XiaoV failed: " + e.getMessage());
-        }
-    }
+			final HTTPResponse response = URL_FETCH_SVC.fetch(request);
+			final int sc = response.getResponseCode();
+			if (HttpServletResponse.SC_OK != sc) {
+				LOGGER.warn("Sends message to XiaoV status code is [" + sc + "]");
+			}
+		} catch (final Exception e) {
+			LOGGER.log(Level.ERROR, "Sends message to XiaoV failed: " + e.getMessage());
+		}
+	}
 
-    /**
-     * Gets the event type {@linkplain EventTypes#ADD_ARTICLE}.
-     *
-     * @return event type
-     */
-    @Override
-    public String getEventType() {
-        return ADD_ARTICLE;
-    }
+	/**
+	 * Gets the event type {@linkplain EventTypes#ADD_ARTICLE}.
+	 *
+	 * @return event type
+	 */
+	@Override
+	public String getEventType() {
+		return ADD_ARTICLE;
+	}
 }

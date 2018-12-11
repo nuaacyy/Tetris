@@ -87,7 +87,7 @@ public final class SymphonyServletListener extends AbstractServletListener {
 
     @Override
     public void contextInitialized(final ServletContextEvent servletContextEvent) {
-        Stopwatchs.start("Context Initialized");
+       
         Latkes.setScanPath("org.b3log.symphony");
         super.contextInitialized(servletContextEvent);
 
@@ -143,9 +143,8 @@ public final class SymphonyServletListener extends AbstractServletListener {
 
         LOGGER.info("Initialized the context");
 
-        Stopwatchs.end();
         LOGGER.log(Level.DEBUG, "Stopwatch: {0}{1}", Strings.LINE_SEPARATOR, Stopwatchs.getTimingStat());
-        Stopwatchs.release();
+       
     }
 
     @Override

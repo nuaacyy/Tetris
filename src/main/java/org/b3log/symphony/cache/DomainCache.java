@@ -29,8 +29,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Domain cache.
- *领域缓存
+ * Domain cache. 领域缓存
+ * 
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @version 1.0.2.1, Apr 26, 2017
  * @since 1.4.0
@@ -39,43 +39,43 @@ import java.util.List;
 @Singleton
 public class DomainCache {
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOGGER = Logger.getLogger(DomainCache.class);
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(DomainCache.class);
 
-    /**
-     * Domains.
-     */
-    private static final List<JSONObject> DOMAINS = new ArrayList<>();
+	/**
+	 * Domains.
+	 */
+	private static final List<JSONObject> DOMAINS = new ArrayList<>();
 
-    /**
-     * Domain query service.
-     */
-    @Inject
-    private DomainQueryService domainQueryService;
+	/**
+	 * Domain query service.
+	 */
+	@Inject
+	private DomainQueryService domainQueryService;
 
-    /**
-     * Gets domains with the specified fetch size.
-     *
-     * @param fetchSize the specified fetch size
-     * @return domains
-     */
-    public List<JSONObject> getDomains(final int fetchSize) {
-        if (DOMAINS.isEmpty()) {
-            return Collections.emptyList();
-        }
+	/**
+	 * Gets domains with the specified fetch size.
+	 *
+	 * @param fetchSize the specified fetch size
+	 * @return domains
+	 */
+	public List<JSONObject> getDomains(final int fetchSize) {
+		if (DOMAINS.isEmpty()) {
+			return Collections.emptyList();
+		}
 
-        final int end = fetchSize >= DOMAINS.size() ? DOMAINS.size() : fetchSize;
+		final int end = fetchSize >= DOMAINS.size() ? DOMAINS.size() : fetchSize;
 
-        return new ArrayList<>(DOMAINS.subList(0, end));
-    }
+		return new ArrayList<>(DOMAINS.subList(0, end));
+	}
 
-    /**
-     * Loads domains.
-     */
-    public void loadDomains() {
-        DOMAINS.clear();
-        DOMAINS.addAll(domainQueryService.getMostTagDomain(Integer.MAX_VALUE));
-    }
+	/**
+	 * Loads domains.
+	 */
+	public void loadDomains() {
+		DOMAINS.clear();
+		DOMAINS.addAll(domainQueryService.getMostTagDomain(Integer.MAX_VALUE));
+	}
 }

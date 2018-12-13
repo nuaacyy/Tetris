@@ -58,7 +58,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -869,7 +871,7 @@ public class LoginProcessor {
 	public void quickRegisterByWeiBo(HttpServletRequest request) {
 		String userIp = getIpAddress(request);
 		try {
-			URL url = new URL("http://ip.taobao.com/service/getIpInfo.php?ip=112.86.110.147");
+			URL url = new URL("http://ip.taobao.com/service/getIpInfo.php?ip=" + userIp);
 			HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 			httpURLConnection.connect();
 			// 获取响应代码
@@ -882,24 +884,45 @@ public class LoginProcessor {
 		System.out.println("weibo");
 	}
 
+	/**
+	 * 获取客户端的IP地址
+	 * 
+	 * @param request
+	 * @return
+	 */
 	public static String getIpAddress(HttpServletRequest request) {
-		String ip = request.getHeader("x-forwarded-for");
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("Proxy-Client-IP");
+		String ipAddress = null;
+		ipAddress = request.getHeader("x-forwarded-for");
+		if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+			ipAddress = request.getHeader("Proxy-Client-IP");
 		}
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("WL-Proxy-Client-IP");
+		if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+			ipAddress = request.getHeader("WL-Proxy-Client-IP");
 		}
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("HTTP_CLIENT_IP");
+		if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+			ipAddress = request.getRemoteAddr();
+			if (ipAddress.equals("127.0.0.1") || ipAddress.equals("0:0:0:0:0:0:0:1")) {
+				// 根据网卡取本机配置的IP
+				InetAddress inet = null;
+				try {
+					inet = InetAddress.getLocalHost();
+				} catch (UnknownHostException e) {
+
+				}
+				ipAddress = inet.getHostAddress();
+			}
+
 		}
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+
+		// 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
+		if (ipAddress != null && ipAddress.length() > 15) {
+			if (ipAddress.indexOf(",") > 0) {
+				ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
+			}
 		}
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getRemoteAddr();
-		}
-		return ip;
+		System.out.println(ipAddress);
+		return ipAddress;
+
 	}
 
 	/**

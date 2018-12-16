@@ -7,8 +7,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.b3log</groupId>
 	<artifactId>symphony</artifactId>
-	<packaging>war</packaging>
+	<packaging>pom</packaging>
 	<version>2.4.0</version>
+	<modules>
+		<!-- 类Spring框架 -->
+		<module>latke</module>
+        <module>sym</module>
+    </modules>
 	<name>Symphony</name>
 	<url>https://github.com/b3log/symphony</url>
 	<description>
@@ -104,6 +109,17 @@
 			<name>Zephyr Cheung</name>
 			<email>O2895205695@gmail.com</email>
 			<url>http://zephyr.b3log.org</url>
+			<roles>
+				<role>Committer</role>
+			</roles>
+			<organization>B3log</organization>
+			<organizationUrl>http://b3log.org</organizationUrl>
+			<timezone>+8</timezone>
+		</developer>
+		
+		<developer>
+			<name>caoyy</name>
+			<email>1755734563@qq.com</email>
 			<roles>
 				<role>Committer</role>
 			</roles>

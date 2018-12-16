@@ -11,8 +11,8 @@
 	<version>2.4.0</version>
 	<modules>
 		<!-- 类Spring框架 -->
-		<module>latke</module>
-        <module>sym</module>
+		<module>Tetris-latke</module>
+        <module>Tetris-sym</module>
     </modules>
 	<name>Tetris</name>
 	<url>https://github.com/b3log/Tetris</url>

@@ -6,7 +6,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.b3log</groupId>
-	<artifactId>symphony</artifactId>
+	<artifactId>Tetris</artifactId>
 	<packaging>pom</packaging>
 	<version>2.4.0</version>
 	<modules>
@@ -14,8 +14,8 @@
 		<module>latke</module>
         <module>sym</module>
     </modules>
-	<name>Symphony</name>
-	<url>https://github.com/b3log/symphony</url>
+	<name>Tetris</name>
+	<url>https://github.com/b3log/Tetris</url>
 	<description>
         Sym Community: https://hacpai.com/about
     </description>

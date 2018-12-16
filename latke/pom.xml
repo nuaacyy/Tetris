@@ -113,9 +113,9 @@
             <version>${mysql-connector-java.version}</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>
 
-<dependencies>
+
+
 <dependency>
     <groupId>javax.servlet</groupId>
     <artifactId>javax.servlet-api</artifactId>

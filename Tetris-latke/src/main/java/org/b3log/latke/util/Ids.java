@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  */
 package org.b3log.latke.util;
 
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 
 /**
  * Id utilities.
@@ -37,22 +39,21 @@ public final class Ids {
     private static final long ID_GEN_SLEEP_MILLIS = 50;
 
     /**
-     * Private constructor.
+     * Private default constructor.
      */
-    private Ids() {
-    }
+    private Ids() {}
 
     /**
      * Gets current date time string.
      *
      * <p>
-     * <b>Note</b>: This method is not safe in cluster environment.
+     *   <b>Note</b>: This method is not safe in cluster environment.
      * </p>
      *
      * @return a time millis string
      */
     public static synchronized String genTimeMillisId() {
-        String ret;
+        String ret = null;
 
         ID_GEN_LOCK.lock();
         try {

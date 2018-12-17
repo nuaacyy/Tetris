@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.b3log.latke.repository.jdbc.util.FieldDefinition;
 
 /**
  * String mapping.
- *
+ * 
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @version 1.0.0.1, Feb 21, 2013
@@ -34,7 +34,7 @@ public class StringMapping implements Mapping {
 
         sql.append(definition.getName());
 
-        if (null == definition.getLength()) {
+        if (definition.getLength() == null) {
             definition.setLength(new Integer("0"));
         }
 

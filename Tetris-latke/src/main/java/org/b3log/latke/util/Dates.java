@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 package org.b3log.latke.util;
 
+
 import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * Date utilities.
@@ -48,10 +50,9 @@ public final class Dates {
     }
 
     /**
-     * Private constructor.
+     * Private default constructor.
      */
-    private Dates() {
-    }
+    private Dates() {}
 
     /**
      * Gets current date time string with the specified date formatter.

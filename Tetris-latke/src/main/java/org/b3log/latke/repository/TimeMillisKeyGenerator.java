@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 package org.b3log.latke.repository;
 
+
 import org.b3log.latke.util.Ids;
+
 
 /**
  * Key generator with time millisecond.
@@ -30,5 +32,5 @@ public final class TimeMillisKeyGenerator implements KeyGenerator<String> {
     public String gen() {
         return Ids.genTimeMillisId();
     }
-
+    
 }

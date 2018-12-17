@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,16 @@
  */
 package org.b3log.latke.repository;
 
+
+import java.util.Collections;
 import java.util.List;
+
 
 /**
  * Composite filter that combines serval sub filters using a {@link CompositeFilterOperator}.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.2, Jul 31, 2018
+ * @version 1.0.0.1, Sep 27, 2013
  * @see CompositeFilterOperator
  */
 public final class CompositeFilter implements Filter {
@@ -48,8 +51,8 @@ public final class CompositeFilter implements Filter {
 
     /**
      * Constructor with the specified parameters.
-     *
-     * @param operator   the specified operator
+     * 
+     * @param operator the specified operator
      * @param subFilters the specified sub filters
      */
     public CompositeFilter(final CompositeFilterOperator operator, final List<Filter> subFilters) {
@@ -59,16 +62,16 @@ public final class CompositeFilter implements Filter {
 
     /**
      * Gets the sub filters.
-     *
+     * 
      * @return sub filters
      */
     public List<Filter> getSubFilters() {
-        return subFilters;
+        return Collections.unmodifiableList(subFilters);
     }
 
     /**
      * Gets the operator.
-     *
+     * 
      * @return operator
      */
     public CompositeFilterOperator getOperator() {
@@ -77,7 +80,7 @@ public final class CompositeFilter implements Filter {
 
     @Override
     public boolean equals(final Object obj) {
-        if (null == obj) {
+        if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
@@ -88,7 +91,7 @@ public final class CompositeFilter implements Filter {
         if (this.operator != other.operator) {
             return false;
         }
-        if (this.subFilters != other.subFilters && (null == this.subFilters || !this.subFilters.equals(other.subFilters))) {
+        if (this.subFilters != other.subFilters && (this.subFilters == null || !this.subFilters.equals(other.subFilters))) {
             return false;
         }
         return true;
@@ -107,14 +110,14 @@ public final class CompositeFilter implements Filter {
     @Override
     public String toString() {
         final StringBuilder stringBuilder = new StringBuilder("operator=");
-
+        
         stringBuilder.append(operator).append(", filters=[");
 
         for (int i = 0; i < subFilters.size(); i++) {
             final Filter filter = subFilters.get(i);
 
             stringBuilder.append("filter=[").append(filter.toString()).append("]");
-
+            
             if (i < subFilters.size() - 1) {
                 stringBuilder.append(", ");
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
  */
 package org.b3log.latke.util;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
@@ -31,29 +28,10 @@ import java.security.SecureRandom;
  * Cryptology utilities.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.0.0.0, Aug 1, 2018
+ * @version 1.0.0.0, Aug 11, 2017
  * @since 2.3.14
  */
 public final class Crypts {
-
-    /**
-     * Signs the specified source string using the specified secret.
-     *
-     * @param source the specified source string
-     * @param secret the specified secret
-     * @return signed string
-     */
-    public static String signHmacSHA1(final String source, final String secret) {
-        try {
-            final Mac mac = Mac.getInstance("HmacSHA1");
-            mac.init(new SecretKeySpec(secret.getBytes("UTF-8"), "HmacSHA1"));
-            final byte[] signData = mac.doFinal(source.getBytes("UTF-8"));
-
-            return new String(Base64.encodeBase64(signData), "UTF-8");
-        } catch (final Exception e) {
-            throw new RuntimeException("HMAC-SHA1 sign failed", e);
-        }
-    }
 
     /**
      * Logger.
@@ -82,7 +60,7 @@ public final class Crypts {
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
             final byte[] result = cipher.doFinal(byteContent);
 
-            return Hex.encodeHexString(result);
+            return encodeHexString(result);
         } catch (final Exception e) {
             LOGGER.log(Level.WARN, "Encrypt failed", e);
 
@@ -100,7 +78,7 @@ public final class Crypts {
      */
     public static String decryptByAES(final String content, final String key) {
         try {
-            final byte[] data = Hex.decodeHex(content.toCharArray());
+            final byte[] data = decodeHex(content.toCharArray());
             final KeyGenerator kgen = KeyGenerator.getInstance("AES");
             final SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
             secureRandom.setSeed(key.getBytes());
@@ -117,6 +95,70 @@ public final class Crypts {
             LOGGER.log(Level.WARN, "Decrypt failed");
 
             return null;
+        }
+    }
+
+    // The following codes copied from Apache Commons Codec
+
+    private static final char[] DIGITS_LOWER;
+    private static final char[] DIGITS_UPPER;
+
+    static {
+        DIGITS_LOWER = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        DIGITS_UPPER = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    }
+
+    private static String encodeHexString(byte[] data) {
+        return new String(encodeHex(data));
+    }
+
+    private static char[] encodeHex(byte[] data) {
+        return encodeHex(data, true);
+    }
+
+    private static char[] encodeHex(byte[] data, boolean toLowerCase) {
+        return encodeHex(data, toLowerCase ? DIGITS_LOWER : DIGITS_UPPER);
+    }
+
+    private static char[] encodeHex(byte[] data, char[] toDigits) {
+        int l = data.length;
+        char[] out = new char[l << 1];
+        int i = 0;
+
+        for (int var5 = 0; i < l; ++i) {
+            out[var5++] = toDigits[(240 & data[i]) >>> 4];
+            out[var5++] = toDigits[15 & data[i]];
+        }
+
+        return out;
+    }
+
+    private static byte[] decodeHex(char[] data) throws Exception {
+        int len = data.length;
+        if ((len & 1) != 0) {
+            throw new Exception("Odd number of characters.");
+        } else {
+            byte[] out = new byte[len >> 1];
+            int i = 0;
+
+            for (int j = 0; j < len; ++i) {
+                int f = toDigit(data[j], j) << 4;
+                ++j;
+                f |= toDigit(data[j], j);
+                ++j;
+                out[i] = (byte) (f & 255);
+            }
+
+            return out;
+        }
+    }
+
+    private static int toDigit(char ch, int index) throws Exception {
+        int digit = Character.digit(ch, 16);
+        if (digit == -1) {
+            throw new Exception("Illegal hexadecimal character " + ch + " at index " + index);
+        } else {
+            return digit;
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,26 @@
  */
 package org.b3log.latke.servlet.advice;
 
-import org.b3log.latke.ioc.Singleton;
+import org.b3log.latke.ioc.inject.Named;
+import org.b3log.latke.ioc.inject.Singleton;
 import org.b3log.latke.servlet.HTTPRequestContext;
-
 import java.util.Map;
 
 
 /**
  * BeforeRequestProcessAdvice.
- *
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
- * @version 1.0.0.1, Sep 29, 2018
- * @since 2.4.18
+ * @version 1.0.0.0, Sep 30, 2012
  */
+@Named("LatkeBuiltInBeforeRequestProcessAdvice")
 @Singleton
 public class BeforeRequestProcessAdvice implements RequestProcessAdvice {
 
     /**
-     * Do advice.
-     *
+     * doAdvice.
      * @param context {@link HTTPRequestContext}
-     * @param args    the invoke method params and values.
+     * @param args the invoke method params and values.
      * @throws RequestProcessAdviceException the exception
      */
-    public void doAdvice(final HTTPRequestContext context, final Map<String, Object> args) throws RequestProcessAdviceException {
-    }
+    public void doAdvice(final HTTPRequestContext context, final Map<String, Object> args) throws RequestProcessAdviceException {}
 }

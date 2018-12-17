@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.b3blog</groupId>
     <artifactId>latke</artifactId>
-    <version>2.4.18</version>
+    <version>2.4.18 - BETA</version>
     <packaging>jar</packaging>
     <name>Latke Core</name>
     <developers>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@ package org.b3log.latke.repository.jdbc;
 import org.b3log.latke.Latkes;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
-import org.b3log.latke.repository.jdbc.util.RepositoryDefinition;
+import org.b3log.latke.repository.jdbc.util.FieldDefinition;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,7 +30,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.0.0.0, Mar 15, 2018
+ * @version 1.0.0.3, Oct 16, 2017
  */
 public final class JdbcFactory implements JdbcDatabase {
 
@@ -62,8 +63,8 @@ public final class JdbcFactory implements JdbcDatabase {
     };
 
     @Override
-    public boolean createTable(final RepositoryDefinition repositoryDefinition) throws SQLException {
-        return databaseSolution.createTable(repositoryDefinition);
+    public boolean createTable(final String tableName, final List<FieldDefinition> fieldDefinitions) throws SQLException {
+        return databaseSolution.createTable(tableName, fieldDefinitions);
     }
 
     @Override

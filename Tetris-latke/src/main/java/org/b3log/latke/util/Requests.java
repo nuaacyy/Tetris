@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,18 @@
  */
 package org.b3log.latke.util;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Pagination;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @author <a href="mailto:dongxv.vang@gmail.com">Dongxu Wang</a>
- * @version 1.1.4.3, Sep 1, 2018
+ * @version 1.1.4.0, Sep 2, 2017
  * @see #PAGINATION_PATH_PATTERN
  */
 public final class Requests {
@@ -86,7 +86,7 @@ public final class Requests {
      * HTTP header "User-Agent" pattern for search engine bot requests.
      */
     private static final Pattern SEARCH_ENGINE_BOT_USER_AGENT_PATTERN = Pattern.compile(
-            "spider|bot|fetcher|crawler|google|yahoo|sogou|youdao|xianguo|rss|monitor|bae|b3log|symphony|solo|rhythm|pipe",
+            "spider|bot|fetcher|crawler" + "|google|yahoo|sogou|youdao|Xianguo.com|RssBandit|JianKongBao Monitor|BAE Online Platform" + "|B3log",
             Pattern.CASE_INSENSITIVE);
 
     /**
@@ -95,7 +95,7 @@ public final class Requests {
     private static final int COOKIE_EXPIRY = 60 * 60 * 24; // 24 hours
 
     /**
-     * Private constructor.
+     * Private default constructor.
      */
     private Requests() {
     }
@@ -189,11 +189,11 @@ public final class Requests {
     public static String getRemoteAddr(final HttpServletRequest request) {
         String ret = request.getHeader("X-forwarded-for");
 
-        if (StringUtils.isBlank(ret)) {
+        if (Strings.isEmptyOrNull(ret)) {
             ret = request.getHeader("X-Real-IP");
         }
 
-        if (StringUtils.isBlank(ret)) {
+        if (Strings.isEmptyOrNull(ret)) {
             return request.getRemoteAddr();
         }
 
@@ -239,7 +239,7 @@ public final class Requests {
     public static boolean searchEngineBotRequest(final HttpServletRequest request) {
         final String userAgent = request.getHeader("User-Agent");
 
-        if (StringUtils.isBlank(userAgent)) {
+        if (Strings.isEmptyOrNull(userAgent)) {
             return false;
         }
 
@@ -337,7 +337,7 @@ public final class Requests {
     public static boolean mobileRequest(final HttpServletRequest request) {
         final String userAgent = request.getHeader("User-Agent");
 
-        if (StringUtils.isBlank(userAgent)) {
+        if (Strings.isEmptyOrNull(userAgent)) {
             return false;
         }
 
@@ -383,7 +383,7 @@ public final class Requests {
     public static int getCurrentPageNum(final String path) {
         LOGGER.log(Level.TRACE, "Getting current page number[path={0}]", path);
 
-        if (StringUtils.isBlank(path) || path.equals("/")) {
+        if (Strings.isEmptyOrNull(path) || path.equals("/")) {
             return 1;
         }
 
@@ -406,7 +406,7 @@ public final class Requests {
     public static int getPageSize(final String path) {
         LOGGER.log(Level.TRACE, "Page number[string={0}]", path);
 
-        if (StringUtils.isBlank(path)) {
+        if (Strings.isEmptyOrNull(path)) {
             return DEFAULT_PAGE_SIZE;
         }
 
@@ -435,7 +435,7 @@ public final class Requests {
     public static int getWindowSize(final String path) {
         LOGGER.log(Level.TRACE, "Page number[string={0}]", path);
 
-        if (StringUtils.isBlank(path)) {
+        if (Strings.isEmptyOrNull(path)) {
             return DEFAULT_WINDOW_SIZE;
         }
 
@@ -460,29 +460,43 @@ public final class Requests {
      * @param request  the specified request
      * @param response the specified response, sets its content type with "application/json"
      * @return a json object
+     * @throws ServletException servlet exception
+     * @throws IOException      io exception
      */
-    public static JSONObject parseRequestJSONObject(final HttpServletRequest request, final HttpServletResponse response) {
+    public static JSONObject parseRequestJSONObject(final HttpServletRequest request, final HttpServletResponse response)
+            throws ServletException, IOException {
         response.setContentType("application/json");
+
+        final StringBuilder sb = new StringBuilder();
+        BufferedReader reader;
 
         final String errMsg = "Can not parse request[requestURI=" + request.getRequestURI() + ", method=" + request.getMethod()
                 + "], returns an empty json object";
 
         try {
-            BufferedReader reader;
             try {
                 reader = request.getReader();
             } catch (final IllegalStateException illegalStateException) {
                 reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
             }
 
-            String tmp = IOUtils.toString(reader);
-            if (StringUtils.isBlank(tmp)) {
+            String line = reader.readLine();
+
+            while (null != line) {
+                sb.append(line);
+                line = reader.readLine();
+            }
+            reader.close();
+
+            String tmp = sb.toString();
+
+            if (Strings.isEmptyOrNull(tmp)) {
                 tmp = "{}";
             }
 
             return new JSONObject(tmp);
-        } catch (final Exception e) {
-            LOGGER.log(Level.ERROR, "Parses request JSON object failed [" + e.getMessage() + "], returns an empty json object");
+        } catch (final Exception ex) {
+            LOGGER.log(Level.ERROR, errMsg, ex);
 
             return new JSONObject();
         }

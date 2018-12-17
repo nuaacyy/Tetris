@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,25 @@
  */
 package org.b3log.latke.event;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * Synchronized event queue.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.2, Sep 16, 2018
+ * @version 1.0.0.1, Aug 16, 2010
  */
 final class SynchronizedEventQueue extends AbstractEventQueue {
-
+    
     /**
      * Synchronized event queue.
      */
-    private Map<String, List<Event<?>>> synchronizedEvents = new HashMap<>();
+    private Map<String, List<Event<?>>> synchronizedEvents = new HashMap<String, List<Event<?>>>();
 
     /**
      * Event manager.
@@ -52,12 +54,14 @@ final class SynchronizedEventQueue extends AbstractEventQueue {
      * Fires the specified event.
      *
      * @param event the specified event
+     * @throws EventException event exception
      */
-    synchronized void fireEvent(final Event<?> event) {
+    synchronized void fireEvent(final Event<?> event) throws EventException {
         final String eventType = event.getType();
         List<Event<?>> events = synchronizedEvents.get(eventType);
+
         if (null == events) {
-            events = new ArrayList<>();
+            events = new ArrayList<Event<?>>();
             synchronizedEvents.put(eventType, events);
         }
 
@@ -71,7 +75,7 @@ final class SynchronizedEventQueue extends AbstractEventQueue {
      *
      * @param event the specified event
      */
-    synchronized void removeEvent(final Event<?> event) {
+    void removeEvent(final Event<?> event) {
         synchronizedEvents.get(event.getType()).remove(event);
     }
 }

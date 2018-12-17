@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package org.b3log.latke.repository;
+
 
 /**
  * A {@link Filter filter } on a single property.
@@ -51,9 +52,9 @@ public final class PropertyFilter implements Filter {
     /**
      * Constructor with the specified parameters.
      *
-     * @param key      the specified key
+     * @param key the specified key
      * @param operator the specified operator
-     * @param value    the specified value
+     * @param value the specified value
      */
     public PropertyFilter(final String key, final FilterOperator operator, final Object value) {
         this.key = key;
@@ -90,7 +91,7 @@ public final class PropertyFilter implements Filter {
 
     @Override
     public boolean equals(final Object obj) {
-        if (null == obj) {
+        if (obj == null) {
             return false;
         }
 
@@ -100,7 +101,7 @@ public final class PropertyFilter implements Filter {
 
         final PropertyFilter other = (PropertyFilter) obj;
 
-        if ((null == this.key) ? (other.key != null) : !this.key.equals(other.key)) {
+        if ((this.key == null) ? (other.key != null) : !this.key.equals(other.key)) {
             return false;
         }
 
@@ -108,7 +109,7 @@ public final class PropertyFilter implements Filter {
             return false;
         }
 
-        if (this.value != other.value && (null == this.value || !this.value.equals(other.value))) {
+        if (this.value != other.value && (this.value == null || !this.value.equals(other.value))) {
             return false;
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,16 @@ import org.b3log.latke.util.AntPathMatcher;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.*;
-import java.util.*;
+import java.net.JarURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -413,7 +421,7 @@ public final class ClassPathResolver {
         private final Set<URL> resources = new LinkedHashSet<URL>();
 
         /**
-         * the simplest constructor.
+         * the main constructor.
          *
          * @param rootPath rootPath
          * @param subPattern subPattern

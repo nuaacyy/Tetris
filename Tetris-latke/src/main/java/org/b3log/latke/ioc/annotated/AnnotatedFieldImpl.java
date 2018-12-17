@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,13 @@
  */
 package org.b3log.latke.ioc.annotated;
 
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -24,10 +29,9 @@ import java.util.Set;
  *
  * @param <T> the declaring type
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.7, Sep 29, 2018
- * @since 2.4.18
+ * @version 1.0.0.6, Mar 30, 2010
  */
-public class AnnotatedFieldImpl<T> implements AnnotatedField {
+public class AnnotatedFieldImpl<T> implements AnnotatedField<T> {
 
     /**
      * Field.
@@ -36,21 +40,11 @@ public class AnnotatedFieldImpl<T> implements AnnotatedField {
 
     /**
      * Constructs an annotated field with the specified field.
-     *
+     * 
      * @param field the specified field
      */
     public AnnotatedFieldImpl(final Field field) {
         this.field = field;
-    }
-
-    @Override
-    public Type getBaseType() {
-        return field.getGenericType();
-    }
-
-    @Override
-    public String toString() {
-        return field.getName();
     }
 
     @Override
@@ -59,7 +53,44 @@ public class AnnotatedFieldImpl<T> implements AnnotatedField {
     }
 
     @Override
-    public Set<AnnotatedField> getFields() {
-        return null;
+    public AnnotatedType<T> getDeclaringType() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isStatic() {
+        return Modifier.isStatic(field.getModifiers());
+    }
+
+    @Override
+    public Type getBaseType() {
+        return field.getGenericType();
+    }
+
+    @Override
+    public <T extends Annotation> T getAnnotation(final Class<T> annotationType) {
+        return field.getAnnotation(annotationType);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Set<Annotation> getAnnotations() {
+        return new HashSet<Annotation>(Arrays.asList(field.getAnnotations()));
+    }
+
+    @Override
+    public boolean isAnnotationPresent(
+        final Class<? extends Annotation> annotationType) {
+        return field.isAnnotationPresent(annotationType);
+    }
+
+    @Override
+    public String toString() {
+        return field.getName();
+    }
+
+    @Override
+    public Set<Type> getTypeClosure() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

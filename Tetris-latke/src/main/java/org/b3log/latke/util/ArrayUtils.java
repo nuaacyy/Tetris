@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 package org.b3log.latke.util;
 
+
 import java.util.Arrays;
+
 
 /**
  * Array utilities.
@@ -27,10 +29,10 @@ public final class ArrayUtils {
 
     /**
      * Concatenates the specified arrays.
-     *
-     * @param <T>   the type of array element
+     * 
+     * @param <T> the type of array element
      * @param first the specified first array
-     * @param rest  the specified rest arrays
+     * @param rest the specified rest arrays
      * @return concatenated array
      */
     public static <T> T[] concatenate(final T[] first, final T[]... rest) {
@@ -39,7 +41,7 @@ public final class ArrayUtils {
         for (final T[] array : rest) {
             totalLength += array.length;
         }
-
+        
         final T[] ret = Arrays.copyOf(first, totalLength);
         int offset = first.length;
 
@@ -47,13 +49,12 @@ public final class ArrayUtils {
             System.arraycopy(array, 0, ret, offset, array.length);
             offset += array.length;
         }
-
+        
         return ret;
     }
 
     /**
      * Private constructor.
      */
-    private ArrayUtils() {
-    }
+    private ArrayUtils() {}
 }

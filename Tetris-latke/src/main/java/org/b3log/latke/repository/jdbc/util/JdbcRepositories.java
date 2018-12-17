@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@ package org.b3log.latke.repository.jdbc.util;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.repository.Repositories;
+import org.b3log.latke.repository.RepositoryException;
 import org.b3log.latke.repository.jdbc.JdbcFactory;
+import org.b3log.latke.util.Strings;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,16 +30,14 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
- * JdbcRepository utilities.
+ * JdbcRepositories utilities.
  *
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.0.0.2, Sep 1, 2018
+ * @version 1.2.0.3, Oct 16, 2017
  */
 public final class JdbcRepositories {
 
@@ -48,54 +47,68 @@ public final class JdbcRepositories {
     private static final Logger LOGGER = Logger.getLogger(JdbcRepositories.class);
 
     /**
-     * "repositories".
+     * the String jsonType to JdbcType.
+     */
+    // @SuppressWarnings("serial")
+    // private static final Map<String, Integer> JSONTYPETOJDBCTYPEMAP =
+    // new HashMap<String, Integer>() {
+    // {
+    //
+    // put("int", Types.INTEGER);
+    // put("long", Types.BIGINT);
+    // put("String", Types.VARCHAR);
+    // put("boolean", Types.BOOLEAN);
+    // put("double", Types.DOUBLE);
+    //
+    // }
+    // };
+    /**
+     * /** to json "repositories".
      */
     private static final String REPOSITORIES = "repositories";
 
     /**
-     * "description".
-     */
-    private static final String DESCRIPTION = "description";
-
-    /**
-     * "name".
+     * /** to json "name".
      */
     private static final String NAME = "name";
 
     /**
-     * "keys".
+     * /** to json "keys".
      */
     private static final String KEYS = "keys";
 
     /**
-     * "type".
+     * /** to json "type".
      */
     private static final String TYPE = "type";
 
     /**
-     * "nullable".
+     * /** to json "nullable".
      */
     private static final String NULLABLE = "nullable";
 
     /**
-     * "length".
+     * /** to json "length".
      */
     private static final String LENGTH = "length";
 
     /**
-     * "iskey".
+     * ** to json "iskey".
      */
     private static final String ISKEY = "iskey";
 
     /**
-     * The default primary key name.
+     * the default key name.
      */
     private static String defaultKeyName = "oId";
 
     /**
-     * Stores all repository definitions.
+     * Stores all repository filed definition in a Map.
+     * <p>
+     * key: the name of the repository value (or table name with prefix): list of all the FieldDefinition
+     * </p>
      */
-    private static List<RepositoryDefinition> repositoryDefinitions = null;
+    private static Map<String, List<FieldDefinition>> repositoriesMap = null;
 
     /**
      * Sets the default key name.
@@ -116,71 +129,69 @@ public final class JdbcRepositories {
     }
 
     /**
-     * Gets keys of the repository specified by the given repository name.
+     * get the RepositoriesMap ,lazy load.
      *
-     * @param repositoryName the given repository name
-     * @return keys
+     * @return Map<String, List<FieldDefinition>>
      */
-    public static List<FieldDefinition> getKeys(final String repositoryName) {
-        final List<RepositoryDefinition> repositoryDefs = getRepositoryDefinitions();
-        for (final RepositoryDefinition repositoryDefinition : repositoryDefs) {
-            if (StringUtils.equals(repositoryName, repositoryDefinition.getName())) {
-                return repositoryDefinition.getKeys();
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Gets the repository definitions,lazy load.
-     *
-     * @return repository definitions
-     */
-    public static List<RepositoryDefinition> getRepositoryDefinitions() {
-        if (null == repositoryDefinitions) {
+    public static Map<String, List<FieldDefinition>> getRepositoriesMap() {
+        if (repositoriesMap == null) {
             try {
-                initRepositoryDefinitions();
+                initRepositoriesMap();
             } catch (final Exception e) {
-                LOGGER.log(Level.ERROR, "Init repository definitions failed", e);
+                LOGGER.log(Level.ERROR, "initRepositoriesMap mistake " + e.getMessage(), e);
             }
         }
 
-        return repositoryDefinitions;
+        return repositoriesMap;
     }
 
     /**
-     * Initializes the repository definitions.
+     * init the repositoriesMap.
      *
-     * @throws JSONException JSONException
+     * @throws JSONException       JSONException
+     * @throws RepositoryException RepositoryException
      */
-    private static void initRepositoryDefinitions() throws JSONException {
+    private static void initRepositoriesMap() throws JSONException, RepositoryException {
         final JSONObject jsonObject = Repositories.getRepositoriesDescription();
-        if (null == jsonObject) {
-            LOGGER.warn("Loads repository description [repository.json] failed");
 
+        if (jsonObject == null) {
+            LOGGER.warn("the repository description[repository.json] miss");
             return;
         }
 
-        repositoryDefinitions = new ArrayList<>();
+        jsonToRepositoriesMap(jsonObject);
+    }
+
+    /**
+     * analysis json data structure to java Map structure.
+     *
+     * @param jsonObject json Model
+     * @throws JSONException JSONException
+     */
+    private static void jsonToRepositoriesMap(final JSONObject jsonObject) throws JSONException {
+        repositoriesMap = new HashMap();
+
         final JSONArray repositoritArray = jsonObject.getJSONArray(REPOSITORIES);
+
         JSONObject repositoryObject;
-        JSONObject keyObject;
+        JSONObject fieldDefinitionObject;
+
         for (int i = 0; i < repositoritArray.length(); i++) {
             repositoryObject = repositoritArray.getJSONObject(i);
+            final String repositoryName = repositoryObject.getString(NAME);
 
-            final RepositoryDefinition repositoryDefinition = new RepositoryDefinition();
-            repositoryDefinitions.add(repositoryDefinition);
-            repositoryDefinition.setName(repositoryObject.getString(NAME));
-            repositoryDefinition.setDescription(repositoryObject.optString(DESCRIPTION));
-            final List<FieldDefinition> keys = new ArrayList();
-            repositoryDefinition.setKeys(keys);
+            final List<FieldDefinition> fieldDefinitions = new ArrayList();
+
+            repositoriesMap.put(repositoryName, fieldDefinitions);
+
             final JSONArray keysJsonArray = repositoryObject.getJSONArray(KEYS);
+
             FieldDefinition definition;
+
             for (int j = 0; j < keysJsonArray.length(); j++) {
-                keyObject = keysJsonArray.getJSONObject(j);
-                definition = fillFieldDefinitionData(keyObject);
-                keys.add(definition);
+                fieldDefinitionObject = keysJsonArray.getJSONObject(j);
+                definition = fillFieldDefinitionData(fieldDefinitionObject);
+                fieldDefinitions.add(definition);
             }
         }
     }
@@ -193,18 +204,33 @@ public final class JdbcRepositories {
      * @throws JSONException JSONException
      */
     private static FieldDefinition fillFieldDefinitionData(final JSONObject fieldDefinitionObject) throws JSONException {
-        final FieldDefinition ret = new FieldDefinition();
-        ret.setName(fieldDefinitionObject.getString(NAME));
-        ret.setDescription(fieldDefinitionObject.optString(DESCRIPTION));
-        ret.setType(fieldDefinitionObject.getString(TYPE));
-        ret.setNullable(fieldDefinitionObject.optBoolean(NULLABLE));
-        ret.setLength(fieldDefinitionObject.optInt(LENGTH));
-        ret.setIsKey(fieldDefinitionObject.optBoolean(ISKEY));
-        if (defaultKeyName.equals(ret.getName())) {
-            ret.setIsKey(true);
+        final FieldDefinition fieldDefinition = new FieldDefinition();
+
+        fieldDefinition.setName(fieldDefinitionObject.getString(NAME));
+
+        // final Integer type =
+        // JSONTYPETOJDBCTYPEMAP
+        // .get(fieldDefinitionObject.getString(TYPE));
+        // if (type == null) {
+        // LOGGER.severe("the type [" + fieldDefinitionObject.getString(TYPE)
+        // + "] no mapping defined now!!!!");
+        // throw new RuntimeException("the type ["
+        // + fieldDefinitionObject.getString(TYPE)
+        // + "] no mapping defined now!!!!");
+        // }
+        fieldDefinition.setType(fieldDefinitionObject.getString(TYPE));
+        fieldDefinition.setNullable(fieldDefinitionObject.optBoolean(NULLABLE));
+        fieldDefinition.setLength(fieldDefinitionObject.optInt(LENGTH));
+        fieldDefinition.setIsKey(fieldDefinitionObject.optBoolean(ISKEY));
+
+        /**
+         * the default key name is 'old'.
+         */
+        if (defaultKeyName.equals(fieldDefinition.getName())) {
+            fieldDefinition.setIsKey(true);
         }
 
-        return ret;
+        return fieldDefinition;
     }
 
     /**
@@ -270,16 +296,18 @@ public final class JdbcRepositories {
      */
     public static List<CreateTableResult> initAllTables() {
         final List<CreateTableResult> ret = new ArrayList<>();
-        final List<RepositoryDefinition> repositoryDefs = getRepositoryDefinitions();
+        final Map<String, List<FieldDefinition>> map = getRepositoriesMap();
+
         boolean isSuccess = false;
-        for (final RepositoryDefinition repositoryDef : repositoryDefs) {
+
+        for (final String tableName : map.keySet()) {
             try {
-                isSuccess = JdbcFactory.createJdbcFactory().createTable(repositoryDef);
+                isSuccess = JdbcFactory.createJdbcFactory().createTable(tableName, map.get(tableName));
             } catch (final SQLException e) {
-                LOGGER.log(Level.ERROR, "Creates table [" + repositoryDef.getName() + "] error", e);
+                LOGGER.log(Level.ERROR, "createTable[" + tableName + "] error", e);
             }
 
-            ret.add(new CreateTableResult(repositoryDef.getName(), isSuccess));
+            ret.add(new CreateTableResult(tableName, isSuccess));
         }
 
         return ret;
@@ -288,22 +316,14 @@ public final class JdbcRepositories {
     /**
      * Generates repository.json from databases.
      *
-     * @param tablePrefix the specified table prefix, for example "symphony_". An empty string {@code ""} means no table prefix
-     * @param tableNames  the specified table names for generation
-     * @param destPath    the specified path of repository.json file to generate
+     * @param tableNames the specified table names for generation
+     * @param destPath   the specified path of repository.json file to generate
      */
-    public static void initRepositoryJSON(final String tablePrefix, final Set<String> tableNames, final String destPath) {
+    public static void initRepositoryJSON(final Set<String> tableNames, final String destPath) {
         Connection connection;
         FileWriter writer = null;
 
         try {
-            final File file = new File(destPath);
-            if (file.isDirectory()) {
-                LOGGER.log(Level.ERROR, "Can't generate repository definition file caused by the specified destination path [" + destPath + "] is a dir");
-
-                return;
-            }
-
             connection = Connections.getConnection();
 
             final DatabaseMetaData databaseMetaData = connection.getMetaData();
@@ -315,26 +335,26 @@ public final class JdbcRepositories {
             repositoryJSON.put("repositories", repositories);
 
             while (resultSet.next()) {
-                final String fullTableName = resultSet.getString("TABLE_NAME");
-                final String tableName = StringUtils.substringAfter(fullTableName, tablePrefix);
+                final String tableName = resultSet.getString("TABLE_NAME");
+
                 if (!tableNames.contains(tableName)) {
                     continue;
                 }
 
                 final JSONObject repository = new JSONObject();
+
                 repositories.put(repository);
+
                 repository.put("name", tableName);
-                String remarks = resultSet.getString("REMARKS");
-                if (StringUtils.isNotBlank(remarks)) {
-                    repository.put("description", remarks);
-                }
                 final JSONArray keys = new JSONArray();
+
                 repository.put("keys", keys);
 
-                final ResultSet rs = databaseMetaData.getColumns(null, "%", fullTableName, "%");
+                final ResultSet rs = databaseMetaData.getColumns(null, "%", tableName, "%");
+
                 while (rs.next()) {
                     final String columnName = rs.getString("COLUMN_NAME");
-                    remarks = rs.getString("REMARKS");
+                    final String remarks = rs.getString("REMARKS");
                     final int dataType = rs.getInt("DATA_TYPE");
                     final int length = rs.getInt("COLUMN_SIZE");
                     final int nullable = rs.getInt("NULLABLE");
@@ -342,13 +362,10 @@ public final class JdbcRepositories {
                     final JSONObject key = new JSONObject();
                     keys.put(key);
                     key.put("name", columnName);
-                    if (StringUtils.isNotBlank(remarks)) {
+                    if (!Strings.isEmptyOrNull(remarks)) {
                         key.put("description", remarks);
                     }
-                    if (0 != nullable) {
-                        key.put("nullable", true);
-                    }
-
+                    key.put("nullable", 0 == nullable ? false : true);
                     switch (dataType) {
                         case Types.CHAR:
                         case Types.LONGNVARCHAR:
@@ -360,15 +377,12 @@ public final class JdbcRepositories {
 
                             break;
                         case Types.BIGINT:
-                            key.put("type", "long");
-
-                            break;
                         case Types.INTEGER:
                         case Types.SMALLINT:
                         case Types.TINYINT:
                             key.put("type", "int");
-
                             break;
+
                         case Types.DATE:
                             key.put("type", "Date");
 
@@ -396,10 +410,6 @@ public final class JdbcRepositories {
                             key.put("type", "Blob");
 
                             break;
-                        case Types.DOUBLE:
-                            key.put("type", "double");
-
-                            break;
                         default:
                             throw new IllegalStateException("Unsupported type [" + dataType + ']');
                     }
@@ -408,12 +418,11 @@ public final class JdbcRepositories {
                 }
             }
 
+            final File file = new File(destPath);
             FileUtils.deleteQuietly(file);
             writer = new FileWriter(file);
-            final String content = repositoryJSON.toString(Integer.valueOf("2"));
+            final String content = repositoryJSON.toString(Integer.valueOf("4"));
             IOUtils.write(content, writer);
-
-            LOGGER.log(Level.INFO, "Generated repository definition file [" + destPath + "]");
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Init repository.json failed", e);
         } finally {
@@ -422,12 +431,12 @@ public final class JdbcRepositories {
     }
 
     /**
-     * Sets the repository definitions.
+     * set the repositoriesMap.
      *
-     * @param repositoryDefinitions repositoryDefinitions
+     * @param repositoriesMap repositoriesMap
      */
-    public static void setRepositoryDefinitions(final List<RepositoryDefinition> repositoryDefinitions) {
-        JdbcRepositories.repositoryDefinitions = repositoryDefinitions;
+    public static void setRepositoriesMap(final Map<String, List<FieldDefinition>> repositoriesMap) {
+        JdbcRepositories.repositoriesMap = repositoriesMap;
     }
 
     /**

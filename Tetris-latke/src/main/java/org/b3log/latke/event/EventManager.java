@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 package org.b3log.latke.event;
 
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.Singleton;
+import org.b3log.latke.ioc.inject.Named;
+import org.b3log.latke.ioc.inject.Singleton;
 import org.b3log.latke.repository.jdbc.JdbcRepository;
 
 import java.util.concurrent.Callable;
@@ -29,6 +30,7 @@ import java.util.concurrent.FutureTask;
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @version 1.1.2.5, Jun 14, 2017
  */
+@Named("LatkeBuiltInEventManager")
 @Singleton
 public class EventManager {
 

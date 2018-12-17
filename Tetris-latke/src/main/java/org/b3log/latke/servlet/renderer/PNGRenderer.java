@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.b3log.latke.servlet.renderer;
 
+
+import org.b3log.latke.image.Image;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.servlet.HTTPRequestContext;
@@ -23,11 +25,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 
+
 /**
  * PNG HTTP response renderer.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.1, Aug 2, 2018
+ * @version 1.0.0.0, Sep 12, 2011
  */
 public final class PNGRenderer extends AbstractHTTPResponseRenderer {
 
@@ -37,30 +40,32 @@ public final class PNGRenderer extends AbstractHTTPResponseRenderer {
     private static final Logger LOGGER = Logger.getLogger(PNGRenderer.class);
 
     /**
-     * Image data to render.
+     * Image to render.
      */
-    private byte[] data;
+    private Image image;
 
     /**
      * Sets the image with the specified image.
-     *
-     * @param data the specified image data
+     * 
+     * @param image the specified image
      */
-    public void setImage(final byte[] data) {
-        this.data = data;
+    public void setImage(final Image image) {
+        this.image = image;
     }
 
     @Override
     public void render(final HTTPRequestContext context) {
         try {
             final HttpServletResponse response = context.getResponse();
+
             response.setContentType("image/png");
 
             final OutputStream outputStream = response.getOutputStream();
-            outputStream.write(data);
+
+            outputStream.write(image.getData());
             outputStream.close();
         } catch (final IOException e) {
-            LOGGER.log(Level.ERROR, "Render PNG failed", e);
+            LOGGER.log(Level.ERROR, "Render failed", e);
         }
     }
 }

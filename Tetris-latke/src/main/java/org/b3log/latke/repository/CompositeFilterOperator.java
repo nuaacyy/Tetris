@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public enum CompositeFilterOperator {
 
     /**
      * Builds an composite filter with 'AND' all the specified sub filters.
-     *
+     * 
      * @param subFilters the specified sub filters
      * @return composite filter
      */
@@ -47,7 +47,7 @@ public enum CompositeFilterOperator {
 
     /**
      * Builds an composite filter with 'OR' all the specified sub filters.
-     *
+     * 
      * @param subFilters the specified sub filters
      * @return composite filter
      */

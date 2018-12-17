@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,22 @@
  */
 package org.b3log.latke.util;
 
-import org.b3log.latke.logging.Logger;
 
-import javax.mail.*;
+import java.util.Properties;
+import javax.mail.Authenticator;
 import javax.mail.Message.RecipientType;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.Properties;
+import org.b3log.latke.logging.Logger;
+
 
 /**
  * Email sender.
- *
+ * 
  * @author <a href="mailto:toughPatient5@gmail.com">Gang Liu</a>
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @version 1.0.0.3, Jun 15, 2010
@@ -69,16 +74,16 @@ public final class EmailSender implements Runnable {
 
     /**
      * Public constructor with parameters.
-     *
+     * 
      * @param userName username
      * @param password password
-     * @param from     email from
-     * @param to       email to
-     * @param message  message about
-     * @param subject  email subject
+     * @param from email from
+     * @param to email to
+     * @param message message about
+     * @param subject email subject
      */
     public EmailSender(final String userName, final String password, final String from, final String to,
-                       final String message, final String subject) {
+        final String message, final String subject) {
         this.userName = userName;
         this.password = password;
         this.from = from;
@@ -89,7 +94,7 @@ public final class EmailSender implements Runnable {
 
     /**
      * Sends email.
-     *
+     * 
      * @throws MessagingException message exception
      */
     private void sendMail() throws MessagingException {

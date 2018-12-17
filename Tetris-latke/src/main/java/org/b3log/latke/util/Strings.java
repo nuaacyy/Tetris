@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.b3log.latke.util;
 
-import org.apache.commons.lang.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,16 +22,16 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 /**
  * String utilities.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.0.0.1, Sep 1, 2018
+ * @version 1.1.2.5, Nov 29, 2015
  */
 public final class Strings {
 
@@ -60,37 +59,18 @@ public final class Strings {
      * Email pattern.
      */
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
-            "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
-
+        "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
+    
     /**
-     * Private constructor.
+     * Private default constructor.
      */
-    private Strings() {
-    }
-
-    /**
-     * Is IPv4.
-     *
-     * @param ip ip
-     * @return {@code true} if it is, returns {@code false} otherwise
-     */
-    public static boolean isIPv4(final String ip) {
-        if (StringUtils.isBlank(ip)) {
-            return false;
-        }
-
-        final String regex = "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
-        final Pattern pattern = Pattern.compile(regex);
-        final Matcher matcher = pattern.matcher(ip);
-
-        return matcher.matches();
-    }
+    private Strings() {}
 
     /**
      * Converts the specified string into a string list line by line.
      *
      * @param string the specified string
-     * @return a list of string lines, returns {@code null} if the specified
+     * @return a list of string lines, returns {@code null} if the specified 
      * string is {@code null}
      * @throws IOException io exception
      */
@@ -99,14 +79,19 @@ public final class Strings {
             return null;
         }
 
-        final List<String> ret = new ArrayList<>();
-        try (final BufferedReader bufferedReader = new BufferedReader(new StringReader(string))) {
+        final BufferedReader bufferedReader = new BufferedReader(new StringReader(string));
+        final List<String> ret = new ArrayList<String>();
+
+        try {
             String line = bufferedReader.readLine();
+
             while (null != line) {
                 ret.add(line);
 
                 line = bufferedReader.readLine();
             }
+        } finally {
+            bufferedReader.close();
         }
 
         return ret;
@@ -114,45 +99,31 @@ public final class Strings {
 
     /**
      * Checks whether the specified string is numeric.
-     *
+     * 
      * @param string the specified string
-     * @return {@code true} if the specified string is numeric, returns {@code false} otherwise
+     * @return {@code true} if the specified string is numeric, returns 
+     * returns {@code false} otherwise
      */
     public static boolean isNumeric(final String string) {
-        try {
-            Double.parseDouble(string);
-        } catch (final Exception e) {
+        if (isEmptyOrNull(string)) {
             return false;
         }
 
-        return true;
-    }
+        final Pattern pattern = Pattern.compile("[0-9]*");
+        final Matcher matcher = pattern.matcher(string);
 
-    /**
-     * Checks whether the specified string is an integer.
-     *
-     * @param string the specified string
-     * @return {@code true} if the specified string is an integer, returns {@code false} otherwise
-     */
-    public static boolean isInteger(final String string) {
-        try {
-            Integer.parseInt(string);
-        } catch (final Exception e) {
-            return false;
-        }
-
-        return true;
+        return matcher.matches();
     }
 
     /**
      * Checks whether the specified string is a valid email address.
-     *
+     * 
      * @param string the specified string
      * @return {@code true} if the specified string is a valid email address,
      * returns {@code false} otherwise
      */
     public static boolean isEmail(final String string) {
-        if (StringUtils.isBlank(string)) {
+        if (isEmptyOrNull(string)) {
             return false;
         }
 
@@ -182,10 +153,21 @@ public final class Strings {
     }
 
     /**
+     * Determines whether the specified string is {@code ""} or {@code null}.
+     *
+     * @param string the specified string
+     * @return {@code true} if the specified string is {@code ""} or
+     * {@code null}, returns {@code false} otherwise
+     */
+    public static boolean isEmptyOrNull(final String string) {
+        return string == null || string.length() == 0;
+    }
+
+    /**
      * Trims every string in the specified strings array.
      *
      * @param strings the specified strings array, returns {@code null} if the
-     *                specified strings is {@code null}
+     * specified strings is {@code null}
      * @return a trimmed strings array
      */
     public static String[] trimAll(final String[] strings) {
@@ -193,29 +175,49 @@ public final class Strings {
             return null;
         }
 
-        return Arrays.stream(strings).map(StringUtils::trim).toArray(size -> new String[size]);
-    }
+        final String[] ret = new String[strings.length];
 
+        for (int i = 0; i < strings.length; i++) {
+            ret[i] = strings[i].trim();
+        }
+
+        return ret;
+    }
+    
     /**
      * Determines whether the specified strings contains the specified string, ignoring case considerations.
-     *
-     * @param string  the specified string
+     * 
+     * @param string the specified string
      * @param strings the specified strings
-     * @return {@code true} if the specified strings contains the specified string, ignoring case considerations, returns {@code false}
+     * @return {@code true} if the specified strings contains the specified string, ignoring case considerations, returns {@code false} 
      * otherwise
      */
     public static boolean containsIgnoreCase(final String string, final String[] strings) {
         if (null == strings) {
             return false;
         }
+        
+        for (final String str : strings) {
+            if (null == str && null == string) {
+                return true;
+            }
 
-        return Arrays.stream(strings).anyMatch(str -> StringUtils.equalsIgnoreCase(string, str));
+            if (null == string || null == str) {
+                continue;
+            }
+
+            if (string.equalsIgnoreCase(str)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
      * Determines whether the specified strings contains the specified string.
-     *
-     * @param string  the specified string
+     * 
+     * @param string the specified string
      * @param strings the specified strings
      * @return {@code true} if the specified strings contains the specified string, returns {@code false} otherwise
      */
@@ -223,13 +225,27 @@ public final class Strings {
         if (null == strings) {
             return false;
         }
+        
+        for (final String str : strings) {
+            if (null == str && null == string) {
+                return true;
+            }
 
-        return Arrays.stream(strings).anyMatch(str -> StringUtils.equals(string, str));
+            if (null == string || null == str) {
+                continue;
+            }
+
+            if (string.equals(str)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
      * Determines whether the specified string is a valid URL.
-     *
+     * 
      * @param string the specified string
      * @return {@code true} if the specified string is a valid URL, returns {@code false} otherwise
      */

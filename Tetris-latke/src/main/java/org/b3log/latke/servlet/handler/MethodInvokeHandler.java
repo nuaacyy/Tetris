@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 package org.b3log.latke.servlet.handler;
 
 
-import org.b3log.latke.ioc.BeanManager;
+import org.b3log.latke.ioc.LatkeBeanManager;
+import org.b3log.latke.ioc.Lifecycle;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HttpControl;
@@ -51,7 +52,7 @@ public class MethodInvokeHandler implements Handler {
 
         // get class instance
         final Method invokeHolder = result.getProcessorInfo().getInvokeHolder();
-        final BeanManager beanManager = BeanManager.getInstance();
+        final LatkeBeanManager beanManager = Lifecycle.getBeanManager();
         final Object classHolder = beanManager.getReference(invokeHolder.getDeclaringClass());
 
         final Object ret = invokeHolder.invoke(classHolder, args.values().toArray());

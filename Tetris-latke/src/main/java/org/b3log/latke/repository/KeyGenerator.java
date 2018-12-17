@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,20 @@
  */
 package org.b3log.latke.repository;
 
+
 /**
  * Key generator.
  *
- * @param <T> data type of key
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @version 1.0.0.0, Mar 14, 2014
+ * @param <T> data type of key
  * @since 1.0.8
  */
 public interface KeyGenerator<T> {
-
+    
     /**
      * Generates a key.
-     *
+     * 
      * @return a key
      */
     T gen();

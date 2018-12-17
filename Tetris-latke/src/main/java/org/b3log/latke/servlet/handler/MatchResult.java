@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,19 @@
  */
 package org.b3log.latke.servlet.handler;
 
+
 import org.b3log.latke.servlet.renderer.AbstractHTTPResponseRenderer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * the matched-result bean.
  *
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
- * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.2, Feb 24, 2018
+ * @version 1.0.0.1, Sep 18, 2013
  */
 public class MatchResult {
 
@@ -37,7 +37,7 @@ public class MatchResult {
     private ProcessorInfo processorInfo;
 
     /**
-     * requestURI.
+     *  requestURI.
      */
     private String requestURI;
 
@@ -54,17 +54,18 @@ public class MatchResult {
     /**
      * the mapValue from url mapping.
      */
-    private Map<String, Object> mapValues = new HashMap<>();
+    private Map<String, Object> mapValues;
 
     /**
      * the {@link AbstractHTTPResponseRenderer}  holders which be inited by sys, for advice to do the pre and post work.
      */
-    private final List<AbstractHTTPResponseRenderer> rendererList = new ArrayList<>();
+    private final List<AbstractHTTPResponseRenderer> rendererList = new ArrayList<AbstractHTTPResponseRenderer>();
 
     /**
-     * @param processorInfo  processorInfo
-     * @param requestURI     requestURI from request
-     * @param matchedMethod  matched http-Method
+     *
+     * @param processorInfo processorInfo
+     * @param requestURI requestURI from request
+     * @param matchedMethod matched http-Method
      * @param matchedPattern matchedPattern in processors
      */
     MatchResult(final ProcessorInfo processorInfo, final String requestURI, final String matchedMethod, final String matchedPattern) {
@@ -77,12 +78,10 @@ public class MatchResult {
     /**
      * the default constructor.
      */
-    public MatchResult() {
-    }
+    public MatchResult() {}
 
     /**
      * getProcessorInfo.
-     *
      * @return processorInfo
      */
     public ProcessorInfo getProcessorInfo() {
@@ -90,8 +89,7 @@ public class MatchResult {
     }
 
     /**
-     * setProcessorInfo.
-     *
+     *setProcessorInfo.
      * @param processorInfo processorInfo
      */
     public void setProcessorInfo(final ProcessorInfo processorInfo) {
@@ -100,7 +98,6 @@ public class MatchResult {
 
     /**
      * getRequestURI.
-     *
      * @return requestURI
      */
     public String getRequestURI() {
@@ -109,7 +106,6 @@ public class MatchResult {
 
     /**
      * setRequestURI.
-     *
      * @param requestURI requestURI
      */
     public void setRequestURI(final String requestURI) {
@@ -118,8 +114,7 @@ public class MatchResult {
 
     /**
      * getMatchedMethod.
-     *
-     * @return matchedMethod
+     * @return  matchedMethod
      */
     public String getMatchedMethod() {
         return matchedMethod;
@@ -127,7 +122,6 @@ public class MatchResult {
 
     /**
      * setMatchedMethod.
-     *
      * @param matchedMethod matchedMethod
      */
     public void setMatchedMethod(final String matchedMethod) {
@@ -135,9 +129,8 @@ public class MatchResult {
     }
 
     /**
-     * getMatchedPattern.
-     *
-     * @return matchedPattern
+     *   getMatchedPattern.
+     * @return  matchedPattern
      */
     public String getMatchedPattern() {
         return matchedPattern;
@@ -145,7 +138,6 @@ public class MatchResult {
 
     /**
      * setMatchedPattern.
-     *
      * @param matchedPattern matchedPattern
      */
     public void setMatchedPattern(final String matchedPattern) {
@@ -154,7 +146,6 @@ public class MatchResult {
 
     /**
      * getMapValues.
-     *
      * @return mapValues
      */
     public Map<String, Object> getMapValues() {
@@ -163,7 +154,6 @@ public class MatchResult {
 
     /**
      * setMapValues.
-     *
      * @param mapValues mapValues
      */
     public void setMapValues(final Map<String, Object> mapValues) {
@@ -172,8 +162,7 @@ public class MatchResult {
 
     /**
      * addRenders.
-     *
-     * @param ins AbstractHTTPResponseRenderer
+     * @param ins  AbstractHTTPResponseRenderer
      */
     public void addRenders(final AbstractHTTPResponseRenderer ins) {
         rendererList.add(ins);
@@ -181,7 +170,6 @@ public class MatchResult {
 
     /**
      * getRendererList.
-     *
      * @return rendererList
      */
     public List<AbstractHTTPResponseRenderer> getRendererList() {

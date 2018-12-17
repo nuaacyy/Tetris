@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@ package org.b3log.latke.repository.jdbc;
 
 import org.b3log.latke.repository.jdbc.mapping.Mapping;
 import org.b3log.latke.repository.jdbc.util.Connections;
+import org.b3log.latke.repository.jdbc.util.FieldDefinition;
 import org.b3log.latke.repository.jdbc.util.JdbcUtil;
-import org.b3log.latke.repository.jdbc.util.RepositoryDefinition;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,7 +31,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.0.0.0, Mar 15, 2018
+ * @version 1.0.0.2, Oct 16, 2017
  */
 public abstract class AbstractJdbcDatabaseSolution implements JdbcDatabase {
 
@@ -50,16 +51,16 @@ public abstract class AbstractJdbcDatabaseSolution implements JdbcDatabase {
     }
 
     @Override
-    public boolean createTable(final RepositoryDefinition repositoryDefinition) throws SQLException {
+    public boolean createTable(final String tableName, final List<FieldDefinition> fieldDefinitions) throws SQLException {
         final Connection connection = Connections.getConnection();
 
         try {
             final StringBuilder createTableSql = new StringBuilder();
-            createTableHead(createTableSql, repositoryDefinition);
-            createTableBody(createTableSql, repositoryDefinition);
-            createTableEnd(createTableSql, repositoryDefinition);
+            createTableHead(createTableSql, tableName);
+            createTableBody(createTableSql, fieldDefinitions);
+            createTableEnd(createTableSql);
 
-            return JdbcUtil.executeSql(createTableSql.toString(), connection, false);
+            return JdbcUtil.executeSql(createTableSql.toString(), connection);
         } catch (final SQLException e) {
             throw e;
         } finally {
@@ -78,26 +79,25 @@ public abstract class AbstractJdbcDatabaseSolution implements JdbcDatabase {
     /**
      * abstract createTableHead for each DB to impl.
      *
-     * @param createTableSql       createSql
-     * @param repositoryDefinition the specified repository definition
+     * @param createTableSql createSql
+     * @param tableName      table name
      */
-    protected abstract void createTableHead(final StringBuilder createTableSql, final RepositoryDefinition repositoryDefinition);
+    protected abstract void createTableHead(final StringBuilder createTableSql, final String tableName);
 
     /**
      * abstract createTableBody for each DB to impl.
      *
-     * @param createTableSql       createSql
-     * @param repositoryDefinition the specified repository definition
+     * @param createTableSql   createSql
+     * @param fieldDefinitions {@link FieldDefinition}
      */
-    protected abstract void createTableBody(final StringBuilder createTableSql, final RepositoryDefinition repositoryDefinition);
+    protected abstract void createTableBody(final StringBuilder createTableSql, final List<FieldDefinition> fieldDefinitions);
 
     /**
      * abstract createTableEnd for each DB to impl.
      *
-     * @param createTableSql       createSql
-     * @param repositoryDefinition the specified repository definition
+     * @param createTableSql createSql
      */
-    protected abstract void createTableEnd(final StringBuilder createTableSql, final RepositoryDefinition repositoryDefinition);
+    protected abstract void createTableEnd(StringBuilder createTableSql);
 
     @Override
     public boolean clearTable(final String tableName, final boolean ifdrop) throws SQLException {
@@ -107,7 +107,7 @@ public abstract class AbstractJdbcDatabaseSolution implements JdbcDatabase {
             final StringBuilder clearTableSql = new StringBuilder();
             clearTableSql(clearTableSql, tableName, ifdrop);
 
-            return JdbcUtil.executeSql(clearTableSql.toString(), connection, false);
+            return JdbcUtil.executeSql(clearTableSql.toString(), connection);
         } catch (final SQLException e) {
             throw e;
         } finally {

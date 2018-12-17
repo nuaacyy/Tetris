@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Cron jobs service.
@@ -36,7 +37,7 @@ import java.util.Timer;
  * </p>
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.0.2.4, Sep 24, 2018
+ * @version 2.0.1.0, Sep 8, 2017
  */
 public final class CronService {
 
@@ -56,12 +57,12 @@ public final class CronService {
     private static final List<Timer> TIMERS = new ArrayList<>();
 
     /**
-     * Init delay in milliseconds.
+     * Cron setup interval in seconds.
      */
-    public static long DELAY_INIT = 10000;
+    private static final int SETUP_INTERVAL = 5;
 
     /**
-     * Private constructor.
+     * Private default constructor.
      */
     private CronService() {
     }
@@ -71,22 +72,23 @@ public final class CronService {
      */
     public static void start() {
         new Thread(() -> {
-            try {
-                Thread.sleep(DELAY_INIT);
-                LOGGER.info("Constructing cron service....");
+            LOGGER.info("Constructing cron service....");
 
+            shutdown();
+
+            try {
                 loadCronXML();
 
                 for (final Cron cron : CRONS) {
                     final Timer timer = new Timer();
                     TIMERS.add(timer);
 
-                    cron.setURL(Latkes.getServePath() + cron.getURL());
-                    timer.scheduleAtFixedRate(cron, cron.getDelay(), cron.getPeriod());
+                    cron.setURL(Latkes.getServer() + Latkes.getContextPath() + cron.getURL());
+                    timer.scheduleAtFixedRate(cron, Cron.TEN * Cron.THOUSAND, cron.getPeriod());
 
                     LOGGER.log(Level.DEBUG, "Scheduled a cron job[url={0}]", cron.getURL());
 
-                    Thread.sleep(5000);
+                    TimeUnit.SECONDS.sleep(SETUP_INTERVAL);
                 }
 
                 LOGGER.log(Level.DEBUG, "[{0}] cron jobs totally", CRONS.size());
@@ -142,30 +144,15 @@ public final class CronService {
                 final Element urlElement = (Element) cronElement.getElementsByTagName("url").item(0);
                 final Element descriptionElement = (Element) cronElement.getElementsByTagName("description").item(0);
                 final Element scheduleElement = (Element) cronElement.getElementsByTagName("schedule").item(0);
-                final Element timeoutElement = (Element) cronElement.getElementsByTagName("timeout").item(0);
-                final Element delayElement = (Element) cronElement.getElementsByTagName("delay").item(0);
-                final Element loggingLevelElement = (Element) cronElement.getElementsByTagName("loggingLevel").item(0);
 
                 final String url = urlElement.getTextContent();
                 final String description = descriptionElement.getTextContent();
                 final String schedule = scheduleElement.getTextContent();
-                String timeout = "120000";
-                if (null != timeoutElement) {
-                    timeout = timeoutElement.getTextContent();
-                }
-                String delay = "10000";
-                if (null != delayElement) {
-                    delay = delayElement.getTextContent();
-                }
-                Level loggingLevel = Level.DEBUG;
-                if (null != loggingLevelElement) {
-                    loggingLevel = Level.valueOf(loggingLevelElement.getTextContent());
-                }
-                CRONS.add(new Cron(url, description, schedule, Integer.valueOf(timeout), Long.valueOf(delay), loggingLevel));
+
+                CRONS.add(new Cron(url, description, schedule));
             }
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Reads cron.xml failed", e);
-
             throw new RuntimeException(e);
         }
     }

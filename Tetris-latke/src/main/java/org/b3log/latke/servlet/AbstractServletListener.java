@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package org.b3log.latke.servlet;
 
 import org.b3log.latke.Latkes;
 import org.b3log.latke.cron.CronService;
-import org.b3log.latke.ioc.BeanManager;
-import org.b3log.latke.ioc.Discoverer;
+import org.b3log.latke.ioc.Lifecycle;
+import org.b3log.latke.ioc.config.Discoverer;
 import org.b3log.latke.ioc.mock.MockServletContext;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
@@ -85,7 +85,8 @@ public abstract class AbstractServletListener implements ServletContextListener,
 
         try {
             final Collection<Class<?>> beanClasses = Discoverer.discover(Latkes.getScanPath());
-            BeanManager.start(beanClasses);
+
+            Lifecycle.startApplication(beanClasses); // Starts Latke IoC container
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Initializes request processors failed", e);
 

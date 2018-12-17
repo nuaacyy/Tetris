@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,27 @@
  */
 package org.b3log.latke.repository.jdbc.util;
 
+
 /**
  * FieldDefinition of each Filed in *.json.
  *
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.0.0.0, Mar 15, 2018
+ * @version 1.0.1.0, Oct 16, 2017
  */
 public class FieldDefinition {
-
     /**
-     * Field name.
+     * field name.
      */
     private String name;
 
     /**
-     * Field description.
-     */
-    private String description;
-
-    /**
-     * Field type.
+     * field type.
      */
     private String type;
 
     /**
-     * The length of the type.
+     * the length of the type.
      */
     private Integer length;
 
@@ -75,24 +70,6 @@ public class FieldDefinition {
      */
     public void setName(final String name) {
         this.name = name;
-    }
-
-    /**
-     * Gets the description.
-     *
-     * @return description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Sets the description with the specified description.
-     *
-     * @param description the specified description
-     */
-    public void setDescription(final String description) {
-        this.description = description;
     }
 
     /**

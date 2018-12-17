@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.cache.redis.RedisCache;
 import org.b3log.latke.cron.CronService;
-import org.b3log.latke.ioc.BeanManager;
+import org.b3log.latke.ioc.Lifecycle;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.repository.jdbc.util.Connections;
 import org.b3log.latke.servlet.AbstractServletListener;
+import org.b3log.latke.util.Strings;
+import org.b3log.latke.util.freemarker.Templates;
 
 import javax.servlet.ServletContext;
 import java.io.File;
@@ -36,6 +38,7 @@ import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,7 +46,7 @@ import java.util.concurrent.Executors;
  * Latke framework configuration utility facade.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.8.0.4, Sep 29, 2018
+ * @version 2.7.9.16, Jul 7, 2017
  * @see #initRuntimeEnv()
  * @see #shutdown()
  * @see #getServePath()
@@ -55,16 +58,6 @@ public final class Latkes {
      * Executor service.
      */
     public static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
-
-    /**
-     * Version.
-     */
-    public static final String VERSION = "2.4.18";
-
-    /**
-     * User Agent.
-     */
-    public static String USER_AGENT = "Latke/" + VERSION + "; +https://github.com/b3log/latke";
 
     /**
      * Logger.
@@ -87,7 +80,7 @@ public final class Latkes {
     private static final Properties REMOTE_PROPS = new Properties();
 
     /**
-     * Locale. Initializes this by {@link #setLocale(java.util.Locale)}.
+     * Locale. Initializes this by {@link #setLocale(Locale)}.
      */
     private static Locale locale;
 
@@ -181,55 +174,46 @@ public final class Latkes {
     private static org.h2.tools.Server h2;
 
     static {
-        try {
-            InputStream resourceAsStream;
-            final String latkePropsEnv = System.getenv("LATKE_PROPS");
-            if (StringUtils.isNotBlank(latkePropsEnv)) {
-                LOGGER.debug("Loading latke.properties from env var [$LATKE_PROPS=" + latkePropsEnv + "]");
-                resourceAsStream = new FileInputStream(latkePropsEnv);
-            } else {
-                LOGGER.debug("Loading latke.properties from classpath [/latke.properties]");
-                resourceAsStream = Latkes.class.getResourceAsStream("/latke.properties");
-            }
+        LOGGER.debug("Loading latke.properties");
 
+        try {
+            final InputStream resourceAsStream = Latkes.class.getResourceAsStream("/latke.properties");
             if (null != resourceAsStream) {
                 LATKE_PROPS.load(resourceAsStream);
+
                 LOGGER.debug("Loaded latke.properties");
             }
         } catch (final Exception e) {
-            LOGGER.log(Level.ERROR, "Loads latke.properties failed", e);
+            LOGGER.log(Level.ERROR, "Not found latke.properties");
 
-            throw new RuntimeException("Loads latke.properties failed");
+            throw new RuntimeException("Not found latke.properties");
         }
 
+        LOGGER.debug("Loading local.properties");
         try {
-            InputStream resourceAsStream;
-            final String localPropsEnv = System.getenv("LATKE_LOCAL_PROPS");
-            if (StringUtils.isNotBlank(localPropsEnv)) {
-                LOGGER.debug("Loading local.properties from env var [$LATKE_LOCAL_PROPS=" + localPropsEnv + "]");
-                resourceAsStream = new FileInputStream(localPropsEnv);
-            } else {
-                LOGGER.debug("Loading local.properties from classpath [/local.properties]");
-                resourceAsStream = Latkes.class.getResourceAsStream("/local.properties");
-            }
-
+            final InputStream resourceAsStream = Latkes.class.getResourceAsStream("/local.properties");
             if (null != resourceAsStream) {
                 LOCAL_PROPS.load(resourceAsStream);
+
                 LOGGER.debug("Loaded local.properties");
             }
         } catch (final Exception e) {
-            LOGGER.log(Level.DEBUG, "Loads local.properties failed, ignored");
+            LOGGER.log(Level.DEBUG, "Not found local.properties");
+            // Ignored
         }
 
         LOGGER.debug("Loading remote.properties");
         try {
             final InputStream resourceAsStream = Latkes.class.getResourceAsStream("/remote.properties");
+
             if (null != resourceAsStream) {
                 REMOTE_PROPS.load(resourceAsStream);
+
                 LOGGER.debug("Loaded remote.properties");
             }
         } catch (final Exception e) {
-            LOGGER.log(Level.DEBUG, "Not found Latke remote.properties, ignored");
+            LOGGER.log(Level.DEBUG, "Not found Latke remote.properties");
+            // Ignored
         }
     }
 
@@ -251,7 +235,7 @@ public final class Latkes {
      */
     public static String getStaticResourceVersion() {
         if (null == staticResourceVersion) {
-            staticResourceVersion = getLatkeProperty("staticResourceVersion");
+            staticResourceVersion = LATKE_PROPS.getProperty("staticResourceVersion");
             if (null == staticResourceVersion) {
                 staticResourceVersion = startupTimeMillis;
             }
@@ -279,7 +263,7 @@ public final class Latkes {
      */
     public static String getServerScheme() {
         if (null == serverScheme) {
-            serverScheme = getLatkeProperty("serverScheme");
+            serverScheme = LATKE_PROPS.getProperty("serverScheme");
             if (null == serverScheme) {
                 throw new IllegalStateException("latke.properties [serverScheme] is empty");
             }
@@ -307,7 +291,7 @@ public final class Latkes {
      */
     public static String getServerHost() {
         if (null == serverHost) {
-            serverHost = getLatkeProperty("serverHost");
+            serverHost = LATKE_PROPS.getProperty("serverHost");
             if (null == serverHost) {
                 throw new IllegalStateException("latke.properties [serverHost] is empty");
             }
@@ -335,7 +319,7 @@ public final class Latkes {
      */
     public static String getServerPort() {
         if (null == serverPort) {
-            serverPort = getLatkeProperty("serverPort");
+            serverPort = LATKE_PROPS.getProperty("serverPort");
         }
 
         return serverPort;
@@ -359,7 +343,7 @@ public final class Latkes {
         if (null == server) {
             final StringBuilder serverBuilder = new StringBuilder(getServerScheme()).append("://").append(getServerHost());
             final String port = getServerPort();
-            if (StringUtils.isNotBlank(port) && !port.equals("80")) {
+            if (!Strings.isEmptyOrNull(port) && !port.equals("80")) {
                 serverBuilder.append(':').append(port);
             }
 
@@ -393,7 +377,7 @@ public final class Latkes {
      */
     public static String getStaticServerScheme() {
         if (null == staticServerScheme) {
-            staticServerScheme = getLatkeProperty("staticServerScheme");
+            staticServerScheme = LATKE_PROPS.getProperty("staticServerScheme");
             if (null == staticServerScheme) {
                 staticServerScheme = getServerScheme();
             }
@@ -422,7 +406,7 @@ public final class Latkes {
      */
     public static String getStaticServerHost() {
         if (null == staticServerHost) {
-            staticServerHost = getLatkeProperty("staticServerHost");
+            staticServerHost = LATKE_PROPS.getProperty("staticServerHost");
             if (null == staticServerHost) {
                 staticServerHost = getServerHost();
             }
@@ -451,7 +435,7 @@ public final class Latkes {
      */
     public static String getStaticServerPort() {
         if (null == staticServerPort) {
-            staticServerPort = getLatkeProperty("staticServerPort");
+            staticServerPort = LATKE_PROPS.getProperty("staticServerPort");
             if (null == staticServerPort) {
                 staticServerPort = getServerPort();
             }
@@ -479,7 +463,7 @@ public final class Latkes {
             final StringBuilder staticServerBuilder = new StringBuilder(getStaticServerScheme()).append("://").append(getStaticServerHost());
 
             final String port = getStaticServerPort();
-            if (StringUtils.isNotBlank(port) && !port.equals("80")) {
+            if (!Strings.isEmptyOrNull(port) && !port.equals("80")) {
                 staticServerBuilder.append(':').append(port);
             }
 
@@ -512,7 +496,7 @@ public final class Latkes {
             return contextPath;
         }
 
-        final String contextPathConf = getLatkeProperty("contextPath");
+        final String contextPathConf = LATKE_PROPS.getProperty("contextPath");
         if (null != contextPathConf) {
             contextPath = contextPathConf;
 
@@ -520,9 +504,9 @@ public final class Latkes {
         }
 
         final ServletContext servletContext = AbstractServletListener.getServletContext();
-        contextPath = servletContext.getContextPath();
+        Latkes.contextPath = servletContext.getContextPath();
 
-        return contextPath;
+        return Latkes.contextPath;
     }
 
     /**
@@ -541,7 +525,7 @@ public final class Latkes {
      */
     public static String getStaticPath() {
         if (null == staticPath) {
-            staticPath = getLatkeProperty("staticPath");
+            staticPath = LATKE_PROPS.getProperty("staticPath");
 
             if (null == staticPath) {
                 staticPath = getContextPath();
@@ -567,7 +551,7 @@ public final class Latkes {
      */
     public static String getScanPath() {
         if (null == scanPath) {
-            scanPath = getLatkeProperty("scanPath");
+            scanPath = LATKE_PROPS.getProperty("scanPath");
         }
 
         return scanPath;
@@ -589,7 +573,7 @@ public final class Latkes {
         LOGGER.log(Level.TRACE, "Initializes runtime environment from configuration file");
 
         if (null == runtimeMode) {
-            final String runtimeModeValue = getLatkeProperty("runtimeMode");
+            final String runtimeModeValue = LATKE_PROPS.getProperty("runtimeMode");
             if (null != runtimeModeValue) {
                 runtimeMode = RuntimeMode.valueOf(runtimeModeValue);
             } else {
@@ -598,30 +582,25 @@ public final class Latkes {
                 runtimeMode = RuntimeMode.PRODUCTION;
             }
         }
-        if (Latkes.RuntimeMode.DEVELOPMENT == getRuntimeMode()) {
-            LOGGER.warn("!!!!Runtime mode is [" + Latkes.RuntimeMode.DEVELOPMENT + "], please make sure configured it with ["
-                    + Latkes.RuntimeMode.PRODUCTION + "] in latke.properties if deployed on production environment!!!!");
-        } else {
-            LOGGER.log(Level.INFO, "Runtime mode is [{0}]", getRuntimeMode());
-        }
+        LOGGER.log(Level.INFO, "Runtime mode is [{0}]", Latkes.getRuntimeMode());
 
         final RuntimeDatabase runtimeDatabase = getRuntimeDatabase();
         LOGGER.log(Level.INFO, "Runtime database is [{0}]", runtimeDatabase);
 
         if (RuntimeDatabase.H2 == runtimeDatabase) {
-            final String newTCPServer = getLocalProperty("newTCPServer");
+            final String newTCPServer = Latkes.getLocalProperty("newTCPServer");
 
             if ("true".equals(newTCPServer)) {
                 LOGGER.log(Level.INFO, "Starting H2 TCP server");
 
-                final String jdbcURL = getLocalProperty("jdbc.URL");
+                final String jdbcURL = Latkes.getLocalProperty("jdbc.URL");
 
-                if (StringUtils.isBlank(jdbcURL)) {
+                if (Strings.isEmptyOrNull(jdbcURL)) {
                     throw new IllegalStateException("The jdbc.URL in local.properties is required");
                 }
 
                 final String[] parts = jdbcURL.split(":");
-                if (5 != parts.length) {
+                if (parts.length != Integer.valueOf("5")/* CheckStyle.... */) {
                     throw new IllegalStateException("jdbc.URL should like [jdbc:h2:tcp://localhost:8250/~/] (the port part is required)");
                 }
 
@@ -655,11 +634,11 @@ public final class Latkes {
      * @return runtime mode
      */
     public static RuntimeMode getRuntimeMode() {
-        if (null == runtimeMode) {
+        if (null == Latkes.runtimeMode) {
             throw new RuntimeException("Runtime mode has not been initialized!");
         }
 
-        return runtimeMode;
+        return Latkes.runtimeMode;
     }
 
     /**
@@ -677,7 +656,7 @@ public final class Latkes {
      * @return runtime cache
      */
     public static RuntimeCache getRuntimeCache() {
-        final String runtimeCache = getLocalProperty("runtimeCache");
+        final String runtimeCache = LOCAL_PROPS.getProperty("runtimeCache");
         if (null == runtimeCache) {
             LOGGER.debug("Not found [runtimeCache] in local.properties, uses [LOCAL_LRU] as default");
 
@@ -698,7 +677,7 @@ public final class Latkes {
      * @return runtime database
      */
     public static RuntimeDatabase getRuntimeDatabase() {
-        final String runtimeDatabase = getLocalProperty("runtimeDatabase");
+        final String runtimeDatabase = LOCAL_PROPS.getProperty("runtimeDatabase");
         if (null == runtimeDatabase) {
             throw new RuntimeException("Please configures runtime database in local.properties!");
         }
@@ -741,14 +720,7 @@ public final class Latkes {
      * @return the value, returns {@code null} if not found
      */
     public static String getLocalProperty(final String key) {
-        String ret = LOCAL_PROPS.getProperty(key);
-        if (StringUtils.isBlank(ret)) {
-            return ret;
-        }
-
-        ret = replaceEnvVars(ret);
-
-        return ret;
+        return LOCAL_PROPS.getProperty(key);
     }
 
     /**
@@ -758,14 +730,7 @@ public final class Latkes {
      * @return the value, returns {@code null} if not found
      */
     public static String getLatkeProperty(final String key) {
-        String ret = LATKE_PROPS.getProperty(key);
-        if (StringUtils.isBlank(ret)) {
-            return ret;
-        }
-
-        ret = replaceEnvVars(ret);
-
-        return ret;
+        return LATKE_PROPS.getProperty(key);
     }
 
     /**
@@ -802,7 +767,7 @@ public final class Latkes {
 
             Connections.shutdownConnectionPool();
             if (RuntimeDatabase.H2 == getRuntimeDatabase()) {
-                final String newTCPServer = getLocalProperty("newTCPServer");
+                final String newTCPServer = Latkes.getLocalProperty("newTCPServer");
                 if ("true".equals(newTCPServer)) {
                     h2.stop();
                     h2.shutdown();
@@ -814,7 +779,7 @@ public final class Latkes {
             LOGGER.log(Level.ERROR, "Shutdowns Latke failed", e);
         }
 
-        BeanManager.close();
+        Lifecycle.endApplication();
 
         // Manually unregister JDBC driver, which prevents Tomcat from complaining about memory leaks
         final Enumeration<Driver> drivers = DriverManager.getDrivers();
@@ -828,6 +793,33 @@ public final class Latkes {
                 LOGGER.log(Level.ERROR, "Unregister JDBC driver [" + driver + "] failed", e);
             }
         }
+    }
+
+    /**
+     * Sets time zone by the specified time zone id.
+     *
+     * @param timeZoneId the specified time zone id
+     */
+    public static void setTimeZone(final String timeZoneId) {
+        final TimeZone timeZone = TimeZone.getTimeZone(timeZoneId);
+
+        Templates.MAIN_CFG.setTimeZone(timeZone);
+        Templates.MOBILE_CFG.setTimeZone(timeZone);
+    }
+
+    /**
+     * Loads skin with the specified directory name.
+     *
+     * @param skinDirName the specified directory name
+     */
+    public static void loadSkin(final String skinDirName) {
+        LOGGER.debug("Loading skin [dirName=" + skinDirName + ']');
+
+        final ServletContext servletContext = AbstractServletListener.getServletContext();
+        Templates.MAIN_CFG.setServletContextForTemplateLoading(servletContext, "skins/" + skinDirName);
+        Latkes.setTimeZone("Asia/Shanghai");
+
+        LOGGER.info("Loaded skins....");
     }
 
     /**
@@ -856,8 +848,8 @@ public final class Latkes {
      *
      * @param path the specified path
      * @return file,
-     * @see javax.servlet.ServletContext#getResource(java.lang.String)
-     * @see javax.servlet.ServletContext#getResourceAsStream(java.lang.String)
+     * @see ServletContext#getResource(String)
+     * @see ServletContext#getResourceAsStream(String)
      */
     public static File getWebFile(final String path) {
         final ServletContext servletContext = AbstractServletListener.getServletContext();
@@ -961,27 +953,4 @@ public final class Latkes {
         PRODUCTION,
     }
 
-    /**
-     * Replaces ${xxx} with corresponding env variable for the specified val.
-     *
-     * @param val the specified val
-     * @return replaced val
-     */
-    private static String replaceEnvVars(final String val) {
-        String ret = val;
-        final String[] envVars = StringUtils.substringsBetween(ret, "${", "}");
-        if (null != envVars) {
-            for (int i = 0; i < envVars.length; i++) {
-                final String envKey = envVars[i];
-                String envVal = System.getenv(envKey);
-                if (StringUtils.isBlank(envVal)) {
-                    envVal = "";
-                }
-
-                ret = StringUtils.replace(ret, "${" + envKey + "}", envVal);
-            }
-        }
-
-        return ret;
-    }
 }

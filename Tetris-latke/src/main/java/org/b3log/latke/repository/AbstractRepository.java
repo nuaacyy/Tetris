@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,11 @@ import java.util.Map;
  * Abstract repository.
  * <p>
  * This is a base adapter for wrapped {@link #repository repository}, the underlying repository will be instantiated in
- * the {@link #AbstractRepository(java.lang.String) constructor}..
+ * the {@link #AbstractRepository(String) constructor}..
  * </p>
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.3.0.0, Mar 3, 2018
+ * @version 2.2.1.10, Oct 17, 2017
  */
 public abstract class AbstractRepository implements Repository {
 
@@ -86,7 +86,7 @@ public abstract class AbstractRepository implements Repository {
         }
 
         Repositories.addRepository(repository);
-        LOGGER.log(Level.INFO, "Constructed repository [name={0}]", name);
+        LOGGER.log(Level.INFO, "Constructed repository[name={0}]", name);
     }
 
     /**
@@ -101,7 +101,7 @@ public abstract class AbstractRepository implements Repository {
     @Override
     public String add(final JSONObject jsonObject) throws RepositoryException {
         if (!isWritable() && !isInternalCall()) {
-            throw new RepositoryException("The repository [name=" + getName() + "] is not writable at present");
+            throw new RepositoryException("The repository[name=" + getName() + "] is not writable at present");
         }
 
         Repositories.check(getName(), jsonObject, Keys.OBJECT_ID);
@@ -112,7 +112,7 @@ public abstract class AbstractRepository implements Repository {
     @Override
     public void update(final String id, final JSONObject jsonObject) throws RepositoryException {
         if (!isWritable() && !isInternalCall()) {
-            throw new RepositoryException("The repository [name=" + getName() + "] is not writable at present");
+            throw new RepositoryException("The repository[name=" + getName() + "] is not writable at present");
         }
 
         Repositories.check(getName(), jsonObject, Keys.OBJECT_ID);
@@ -123,19 +123,10 @@ public abstract class AbstractRepository implements Repository {
     @Override
     public void remove(final String id) throws RepositoryException {
         if (!isWritable() && !isInternalCall()) {
-            throw new RepositoryException("The repository [name=" + getName() + "] is not writable at present");
+            throw new RepositoryException("The repository[name=" + getName() + "] is not writable at present");
         }
 
         repository.remove(id);
-    }
-
-    @Override
-    public void remove(final Query query) throws RepositoryException {
-        if (!isWritable() && !isInternalCall()) {
-            throw new RepositoryException("The repository [name=" + getName() + "] is not writable at present");
-        }
-
-        repository.remove(query);
     }
 
     @Override
@@ -143,7 +134,7 @@ public abstract class AbstractRepository implements Repository {
         try {
             return repository.get(id);
         } catch (final JDBCRepositoryException e) {
-            LOGGER.log(Level.WARN, "SQL exception [msg={0}]", e.getMessage());
+            LOGGER.log(Level.WARN, "SQL exception[msg={0}]", e.getMessage());
 
             return null;
         }
@@ -164,7 +155,7 @@ public abstract class AbstractRepository implements Repository {
         try {
             return repository.get(query);
         } catch (final JDBCRepositoryException e) {
-            LOGGER.log(Level.WARN, "SQL exception [msg={0}, repository={1}, query={2}]",
+            LOGGER.log(Level.WARN, "SQL exception[msg={0}, repository={1}, query={2}]",
                     e.getMessage(), repository.getName(), query.toString());
 
             final JSONObject ret = new JSONObject();
@@ -185,7 +176,7 @@ public abstract class AbstractRepository implements Repository {
         try {
             return repository.select(statement, params);
         } catch (final JDBCRepositoryException e) {
-            LOGGER.log(Level.WARN, "SQL exception [msg={0}, repository={1}, statement={2}]",
+            LOGGER.log(Level.WARN, "SQL exception[msg={0}, repository={1}, statement={2}]",
                     e.getMessage(), repository.getName(), statement);
 
             return Collections.emptyList();

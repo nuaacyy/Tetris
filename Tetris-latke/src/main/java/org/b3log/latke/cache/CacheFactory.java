@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,10 @@ public final class CacheFactory {
     /**
      * Caches.
      */
-    private static final Map<String, Cache> CACHES = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<String, Cache> CACHES = Collections.synchronizedMap(new HashMap<String, Cache>());
 
     /**
-     * Private constructor.
+     * Private default constructor.
      */
     private CacheFactory() {
     }

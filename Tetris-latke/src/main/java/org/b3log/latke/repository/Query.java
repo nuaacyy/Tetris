@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,21 @@
  */
 package org.b3log.latke.repository;
 
-import java.util.*;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
 
 /**
  * Query.
- *
+ * 
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.1.0.0, Jun 5, 2018
+ * @version 1.0.1.0, Jun 27, 2012
  * @see Projection
  * @see Filter
  * @see SortDirection
@@ -47,7 +54,7 @@ public final class Query {
     /**
      * Sorts.
      */
-    private Map<String, SortDirection> sorts = new LinkedHashMap<>();
+    private Map<String, SortDirection> sorts = new LinkedHashMap<String, SortDirection>();
 
     /**
      * Filter.
@@ -57,17 +64,12 @@ public final class Query {
     /**
      * Projections.
      */
-    private Set<Projection> projections = new HashSet<>();
+    private Set<Projection> projections = new HashSet<Projection>();
 
     /**
      * Indices.
      */
-    private Set<String[]> indexes = new HashSet<>();
-
-    /**
-     * Debug flag. https://github.com/b3log/latke/issues/82
-     */
-    private boolean debug;
+    private Set<String[]> indexes = new HashSet<String[]>();
 
     /**
      * Initialization value for hashing.
@@ -80,31 +82,10 @@ public final class Query {
     private static final int BASE = 83;
 
     /**
-     * Checks whether is debug.
-     *
-     * @return {@code true} if it is, returns {@code false} otherwise
-     */
-    public boolean isDebug() {
-        return debug;
-    }
-
-    /**
-     * Sets the debug flag.
-     *
-     * @param debug the specified debug flag
-     * @return the currency query object
-     */
-    public Query setDebug(final boolean debug) {
-        this.debug = debug;
-
-        return this;
-    }
-
-    /**
      * Adds a projection with the specified property name and value type.
-     *
+     * 
      * @param propertyName the specified property name
-     * @param valueType    the specified value type
+     * @param valueType the specified value type
      * @return the current query object
      */
     public Query addProjection(final String propertyName, final Class<?> valueType) {
@@ -115,7 +96,7 @@ public final class Query {
 
     /**
      * Gets the projections.
-     *
+     * 
      * @return projections
      */
     public Set<Projection> getProjections() {
@@ -124,7 +105,7 @@ public final class Query {
 
     /**
      * Indexes the specified properties for future queries.
-     *
+     * 
      * @param properties the specified properties
      * @return the current query object
      */
@@ -140,7 +121,7 @@ public final class Query {
 
     /**
      * Gets the indices.
-     *
+     * 
      * @return indices
      */
     public Set<String[]> getIndexes() {
@@ -150,7 +131,7 @@ public final class Query {
     /**
      * Adds sort for the specified property with the specified direction.
      *
-     * @param propertyName  the specified property name to sort
+     * @param propertyName the specified property name to sort
      * @param sortDirection the specified sort
      * @return the current query object
      */
@@ -162,9 +143,9 @@ public final class Query {
 
     /**
      * Sets the filter with the specified filter.
-     *
+     * 
      * @param filter the specified filter
-     * @return the current query object
+     * @return the current query object 
      */
     public Query setFilter(final Filter filter) {
         this.filter = filter;
@@ -174,7 +155,7 @@ public final class Query {
 
     /**
      * Gets the filter.
-     *
+     * 
      * @return filter
      */
     public Filter getFilter() {
@@ -185,7 +166,8 @@ public final class Query {
      * Gets the current page number.
      *
      * <p>
-     * <b>Note</b>: The default value of the current page number is @code -1}.
+     *   <b>Note</b>: The default value of the current page number is
+     *   {@code -1}.
      * </p>
      *
      * @return current page number
@@ -210,7 +192,7 @@ public final class Query {
      * Sets the page size.
      *
      * <p>
-     * <b>Note</b>: The default value of the page size {@code -1}.
+     *   <b>Note</b>: The default value of the page size {@code -1}.
      * </p>
      *
      * @return page size
@@ -242,7 +224,7 @@ public final class Query {
 
     /**
      * Gets the page count.
-     *
+     * 
      * @return page count
      */
     public Integer getPageCount() {
@@ -251,9 +233,9 @@ public final class Query {
 
     /**
      * Sets the page count with the specified page count.
-     *
+     * 
      * @param pageCount the specified page count
-     * @return the current query object
+     * @return the current query object 
      */
     public Query setPageCount(final int pageCount) {
         this.pageCount = pageCount;
@@ -263,7 +245,7 @@ public final class Query {
 
     @Override
     public boolean equals(final Object obj) {
-        if (null == obj) {
+        if (obj == null) {
             return false;
         }
 
@@ -281,15 +263,15 @@ public final class Query {
             return false;
         }
 
-        if (this.sorts != other.sorts && (null == this.sorts || !this.sorts.equals(other.sorts))) {
+        if (this.sorts != other.sorts && (this.sorts == null || !this.sorts.equals(other.sorts))) {
             return false;
         }
 
-        if (this.filter != other.filter && (null == this.filter || !this.filter.equals(other.filter))) {
+        if (this.filter != other.filter && (this.filter == null || !this.filter.equals(other.filter))) {
             return false;
         }
 
-        if (this.projections != other.projections && (null == this.projections || !this.projections.equals(other.projections))) {
+        if (this.projections != other.projections && (this.projections == null || !this.projections.equals(other.projections))) {
             return false;
         }
 
@@ -312,7 +294,7 @@ public final class Query {
     @Override
     public String toString() {
         final StringBuilder stringBuilder = new StringBuilder("currentPageNum=").append(currentPageNum).append(", pageSize=").append(pageSize).append(", pageCount=").append(pageCount).append(
-                ", sorts=[");
+            ", sorts=[");
 
         final Set<Entry<String, SortDirection>> entrySet = sorts.entrySet();
         final Iterator<Entry<String, SortDirection>> sortsIterator = entrySet.iterator();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,20 @@
  */
 package org.b3log.latke.mail.local;
 
-import org.apache.commons.lang.StringUtils;
-import org.b3log.latke.mail.MailService.Message;
-
-import javax.mail.*;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
+import javax.mail.Authenticator;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 import javax.mail.internet.MimeUtility;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.Set;
+import org.b3log.latke.mail.MailService.Message;
+import org.b3log.latke.util.Strings;
 
 /**
  * Email sender.
@@ -91,15 +94,15 @@ final class MailSender {
      * javax.mail.Message}.
      *
      * @param message the specified message
-     * @return a {@link javax.mail.internet.MimeMessage}
+     * @return a {@link MimeMessage}
      * @throws Exception if converts error
      */
     public javax.mail.Message convert2JavaMailMsg(final Message message) throws Exception {
-        if (null == message) {
+        if (message == null) {
             return null;
         }
 
-        if (StringUtils.isBlank(message.getFrom())) {
+        if (Strings.isEmptyOrNull(message.getFrom())) {
             throw new MessagingException("Null from");
         }
 

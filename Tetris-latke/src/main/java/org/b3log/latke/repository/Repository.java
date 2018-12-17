@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,15 @@
  */
 package org.b3log.latke.repository;
 
-import org.b3log.latke.Keys;
-import org.b3log.latke.util.CollectionUtils;
-import org.json.JSONObject;
-
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
 
 /**
  * Repository.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.4.0.0, Aug 27, 2018
+ * @version 1.2.2.5, Sep 4, 2016
  */
 public interface Repository {
 
@@ -42,11 +39,12 @@ public interface Repository {
     /**
      * Updates a certain json object by the specified id and the specified new json object.
      *
-     * @param id         the specified id
+     * @param id the specified id
      * @param jsonObject the specified new json object
      * @throws RepositoryException repository exception
      */
-    void update(final String id, final JSONObject jsonObject) throws RepositoryException;
+    void update(final String id, final JSONObject jsonObject)
+            throws RepositoryException;
 
     /**
      * Removes a json object by the specified id.
@@ -55,14 +53,6 @@ public interface Repository {
      * @throws RepositoryException repository exception
      */
     void remove(final String id) throws RepositoryException;
-
-    /**
-     * Removes json objects by the specified query.
-     *
-     * @param query the specified query
-     * @throws RepositoryException repository exception
-     */
-    void remove(final Query query) throws RepositoryException;
 
     /**
      * Gets a json object by the specified id.
@@ -93,16 +83,16 @@ public interface Repository {
 
     /**
      * Gets json objects by the specified query.
-     * <p>
+     *
      * <h4>Pagination</h4>
      * If the "paginationPageCount" has been specified (not with {@code -1} or {@code null}) by caller (as the argument
      * {@link Query#pageCount}), the value will be used in the returned value. In other words, the page count result
      * will not be calculated by this interface, otherwise, the returned value pagination.paginationPageCount and
      * pagination.paginationRecordCount will be calculated with query condition.
-     * <p>
+     *
      * <p>
      * <b>Note</b>: The order of elements of the returned result list is decided by datastore implementation, excepts
-     * {@link Query#addSort(java.lang.String, org.b3log.latke.repository.SortDirection)} be invoked.
+     * {@link Query#addSort(String, org.b3log.latke.repository.SortDirection)} be invoked.
      * </p>
      *
      * @param query the specified query
@@ -118,29 +108,18 @@ public interface Repository {
      *     }, ....]
      * }
      * </pre>
+     *
      * @throws RepositoryException repository exception
      */
     JSONObject get(final Query query) throws RepositoryException;
 
     /**
-     * Gets json objects by the specified query. Calling this interface just returns result object list, no pagination info.
-     *
-     * @param query the specified query
-     * @return a list of result json object, returns an empty list if not found
-     * @throws RepositoryException repository exception
-     */
-    default List<JSONObject> getList(final Query query) throws RepositoryException {
-        final JSONObject result = get(query);
-
-        return CollectionUtils.jsonArrayToList(result.optJSONArray(Keys.RESULTS));
-    }
-
-    /**
      * Gets json objects by the specified query statement.
      *
      * @param statement the specified query statement
-     * @param params    the specified parameters
+     * @param params the specified parameters
      * @return a list of result, returns an empty list if not found
+     *
      * @throws RepositoryException repository exception
      */
     List<JSONObject> select(final String statement, final Object... params) throws RepositoryException;
@@ -181,7 +160,7 @@ public interface Repository {
 
     /**
      * Begins a transaction against the repository.
-     * <p>
+     *
      * <p>
      * Callers are responsible for explicitly calling {@linkplain Transaction#commit()} or
      * {@linkplain Transaction#rollback()} when they no longer need the {@code Transaction}. The {@code Transaction}

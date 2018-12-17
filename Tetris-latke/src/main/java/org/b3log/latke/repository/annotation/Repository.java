@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,29 @@
 package org.b3log.latke.repository.annotation;
 
 
-import org.b3log.latke.ioc.Singleton;
-import org.b3log.latke.ioc.Stereotype;
+import org.b3log.latke.ioc.inject.Named;
+import org.b3log.latke.ioc.inject.Stereotype;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 /**
  * Indicates that an annotated type is a repository.
- *
+ * 
  * <p>
- * In Latke IoC container, a repository is {@link Singleton singleton} scope by default.
+ * In Latke IoC container, a repository is {@link org.b3log.latke.ioc.inject.Singleton singleton} scope by default.
  * </p>
- *
+ * 
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.1, Sep 29, 2018
- * @since 2.4.18
+ * @version 1.0.0.0, Jun 20, 2013
  */
+@Named
 @Stereotype
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Repository {
-}
+public @interface Repository {}

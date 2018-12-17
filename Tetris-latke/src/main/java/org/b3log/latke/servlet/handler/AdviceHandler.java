@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@ package org.b3log.latke.servlet.handler;
 
 
 import org.b3log.latke.Keys;
-import org.b3log.latke.ioc.BeanManager;
+import org.b3log.latke.ioc.LatkeBeanManager;
+import org.b3log.latke.ioc.Lifecycle;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.servlet.HTTPRequestContext;
@@ -32,12 +33,12 @@ import org.b3log.latke.servlet.renderer.AbstractHTTPResponseRenderer;
 import org.b3log.latke.servlet.renderer.JSONRenderer;
 import org.json.JSONObject;
 
-import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 
 
 /**
@@ -58,13 +59,14 @@ public class AdviceHandler implements Handler {
     public void handle(final HTTPRequestContext context, final HttpControl httpControl) throws Exception {
         // the data which pre-handler provided.
         final MatchResult result = (MatchResult) httpControl.data(RequestDispatchHandler.MATCH_RESULT);
+        @SuppressWarnings("unchecked")
         final Map<String, Object> args = (Map<String, Object>) httpControl.data(ArgsHandler.PREPARE_ARGS);
 
         final Method invokeHolder = result.getProcessorInfo().getInvokeHolder();
         final Class<?> processorClass = invokeHolder.getDeclaringClass();
         final List<AbstractHTTPResponseRenderer> rendererList = result.getRendererList();
 
-        final BeanManager beanManager = BeanManager.getInstance();
+        final LatkeBeanManager beanManager = Lifecycle.getBeanManager();
 
         final List<Class<? extends BeforeRequestProcessAdvice>> beforeAdviceClassList = getBeforeList(invokeHolder, processorClass);
 
@@ -121,7 +123,7 @@ public class AdviceHandler implements Handler {
     /**
      * get BeforeRequestProcessAdvice from annotation.
      *
-     * @param invokeHolder   the real invoked method
+     * @param invokeHolder the real invoked method
      * @param processorClass the class of the invoked methond
      * @return the list of BeforeRequestProcessAdvice
      */
@@ -146,7 +148,7 @@ public class AdviceHandler implements Handler {
     /**
      * get AfterRequestProcessAdvice from annotation.
      *
-     * @param invokeHolder   the real invoked method
+     * @param invokeHolder the real invoked method
      * @param processorClass the class of the invoked methond
      * @return the list of AfterRequestProcessAdvice
      */

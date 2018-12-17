@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  */
 package org.b3log.latke.servlet.converter;
 
+
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.annotation.PathVariable;
 import org.b3log.latke.servlet.annotation.Render;
 import org.b3log.latke.servlet.handler.MatchResult;
 import org.b3log.latke.servlet.renderer.AbstractHTTPResponseRenderer;
-import org.b3log.latke.util.Requests;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,25 +30,24 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
- * The params converts.
+ * the params-converts whick latke provides.
  *
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
- * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.1.0.0, Feb 24, 2018
+ * @version 1.0.0.1, Sep 18, 2013
  */
 public final class Converters {
 
     /**
      * CONVERTERS_LIST holder.
      */
-    private static final List<IConverters> CONVERTERS_LIST = new ArrayList<>();
+    private static final List<IConverters> CONVERTERS_LIST = new ArrayList<IConverters>();
 
     /**
-     * Private constructor.
+     * the private constructor.
      */
-    private Converters() {
-    }
+    private Converters() {}
 
     static {
         // first for special-class-convert(mainly for context) then
@@ -58,10 +57,8 @@ public final class Converters {
         registerConverters(new ResponseConvert());
         registerConverters(new RendererConvert());
         registerConverters(new JSONObjectConvert());
-        registerConverters(new RequestJSONObjectConvert());
-
-        // The path variable converter must be the last one
         registerConverters(new PathVariableConvert());
+
     }
 
     /**
@@ -84,20 +81,24 @@ public final class Converters {
      * @return ret
      */
     public static Object doConvert(final Class<?> parameterType, final String paramterName, final HTTPRequestContext context,
-                                   final MatchResult result, final int sequence) {
-        for (final IConverters iConverters : CONVERTERS_LIST) {
+        final MatchResult result, final int sequence) {
+
+        for (IConverters iConverters : CONVERTERS_LIST) {
             if (iConverters.isMatched(parameterType, paramterName)) {
                 try {
                     return iConverters.convert(parameterType, paramterName, context, result, sequence);
                 } catch (final Exception e) {
-                    e.printStackTrace();
+                    e.printStackTrace(); // To change body of catch statement
+                    // use File | Settings | File
+                    // Templates.
                 }
             }
         }
-
         return null;
     }
+
 }
+
 
 /**
  * the interface of the converter.
@@ -128,8 +129,10 @@ interface IConverters {
      * @throws Exception the convert-Exception
      */
     Object convert(Class<?> parameterType, String paramterName, HTTPRequestContext context, MatchResult result, int sequence)
-            throws Exception;
+        throws Exception;
+
 }
+
 
 /**
  * to inject HTTPRequestContext.
@@ -148,10 +151,11 @@ class ContextConvert implements IConverters {
 
     @Override
     public Object convert(final Class<?> parameterType, final String paramterName, final HTTPRequestContext context,
-                          final MatchResult result, final int sequence) throws Exception {
+        final MatchResult result, final int sequence) throws Exception {
         return context;
     }
 }
+
 
 /**
  * to inject  HttpServletRequest.
@@ -170,10 +174,11 @@ class RequestConvert implements IConverters {
 
     @Override
     public Object convert(final Class<?> parameterType, final String paramterName, final HTTPRequestContext context,
-                          final MatchResult result, final int sequence) throws Exception {
+        final MatchResult result, final int sequence) throws Exception {
         return context.getRequest();
     }
 }
+
 
 /**
  * to inject HttpServletResponse.
@@ -192,10 +197,11 @@ class ResponseConvert implements IConverters {
 
     @Override
     public Object convert(final Class<?> parameterType, final String paramterName, final HTTPRequestContext context,
-                          final MatchResult result, final int sequence) throws Exception {
+        final MatchResult result, final int sequence) throws Exception {
         return context.getResponse();
     }
 }
+
 
 /**
  * to init and inject AbstractHTTPResponseRenderer.
@@ -214,11 +220,11 @@ class RendererConvert implements IConverters {
 
     @Override
     public Object convert(final Class<?> parameterType, final String paramterName, final HTTPRequestContext context,
-                          final MatchResult result, final int sequence) throws Exception {
+        final MatchResult result, final int sequence) throws Exception {
 
         final AbstractHTTPResponseRenderer ins = (AbstractHTTPResponseRenderer) parameterType.newInstance();
         final String rid = getRendererId(result.getProcessorInfo().getInvokeHolder().getDeclaringClass(),
-                result.getProcessorInfo().getInvokeHolder(), sequence);
+            result.getProcessorInfo().getInvokeHolder(), sequence);
 
         ins.setRendererId(rid);
         result.addRenders(ins);
@@ -269,7 +275,9 @@ class RendererConvert implements IConverters {
 
         return sb.toString();
     }
+
 }
+
 
 /**
  * the default PathVariable name-matched convert.
@@ -285,7 +293,7 @@ class PathVariableConvert implements IConverters {
 
     @Override
     public Object convert(final Class<?> parameterType, final String paramterName, final HTTPRequestContext context,
-                          final MatchResult result, final int sequence) throws Exception {
+        final MatchResult result, final int sequence) throws Exception {
 
         Object ret = result.getMapValues().get(paramterName);
 
@@ -320,55 +328,40 @@ class PathVariableConvert implements IConverters {
     }
 }
 
+
 /**
  * to store request-params in jsonObject.
  *
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
- * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.2, Feb 24, 2018
+ * @version 1.0.0.1, Sep 18, 2013
  */
 class JSONObjectConvert implements IConverters {
 
     @Override
     public Boolean isMatched(final Class<?> parameterType, final String paramterName) {
-        return parameterType.equals(JSONObject.class) && !"requestJSONObject".equals(paramterName);
+
+        if (parameterType.equals(JSONObject.class)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
     public Object convert(final Class<?> parameterType, final String paramterName, final HTTPRequestContext context,
-                          final MatchResult result, final int sequence) throws Exception {
+        final MatchResult result, final int sequence) throws Exception {
+
         final JSONObject ret = new JSONObject();
 
         final HttpServletRequest request = context.getRequest();
+
         for (Object o : request.getParameterMap().keySet()) {
+
             ret.put(String.valueOf(o), request.getParameterMap().get(o));
         }
-
         // mapValue will cover
         for (String key : result.getMapValues().keySet()) {
             ret.put(key, result.getMapValues().get(key));
         }
-
         return ret;
-    }
-}
-
-/**
- * To store request body json with requestJSONObject. https://github.com/b3log/latke/issues/76
- *
- * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.2, Feb 24, 2018
- */
-class RequestJSONObjectConvert implements IConverters {
-
-    @Override
-    public Boolean isMatched(final Class<?> parameterType, final String paramterName) {
-        return parameterType.equals(JSONObject.class) && "requestJSONObject".equals(paramterName);
-    }
-
-    @Override
-    public Object convert(final Class<?> parameterType, final String paramterName, final HTTPRequestContext context,
-                          final MatchResult result, final int sequence) throws Exception {
-        return Requests.parseRequestJSONObject(context.getRequest(), context.getResponse());
     }
 }

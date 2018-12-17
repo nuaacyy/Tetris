@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,189 +15,282 @@
  */
 package org.b3log.latke.ioc;
 
-import org.b3log.latke.event.EventManager;
-import org.b3log.latke.logging.Level;
-import org.b3log.latke.logging.Logger;
-import org.b3log.latke.plugin.PluginManager;
-import org.b3log.latke.service.LangPropsService;
-import org.b3log.latke.servlet.advice.AfterRequestProcessAdvice;
-import org.b3log.latke.servlet.advice.BeforeRequestProcessAdvice;
-import org.b3log.latke.util.Reflections;
+import org.b3log.latke.ioc.annotated.AnnotatedType;
+import org.b3log.latke.ioc.bean.Bean;
+import org.b3log.latke.ioc.context.Context;
+import org.b3log.latke.ioc.context.Contextual;
+import org.b3log.latke.ioc.context.CreationalContext;
+import org.b3log.latke.ioc.point.InjectionPoint;
+import org.b3log.latke.ioc.point.InjectionTarget;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Set;
 
 /**
- * Latke bean manager implementation.
- *
- * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.0.0.0, Sep 29, 2018
- * @since 2.4.18
+ * <p>Allows a portable extension to interact directly with the container.
+ * Provides operations for obtaining contextual references for beans, along 
+ * with many other operations of use to portable extensions.</p>
+ * 
+ * <p>Any bean may obtain an instance of <tt>BeanManager</tt> by injecting
+ * it:</p>
+ * 
+ * <pre>
+ * &#064;Inject BeanManager manager;
+ * </pre>
+ * 
+ * <p>Java EE components may obtain an instance of <tt>BeanManager</tt> from
+ * {@linkplain javax.naming JNDI} by looking up the name {@code
+ * java:comp/BeanManager}.</p>
+ * 
+ * <p>Any operation of <tt>BeanManager</tt> may be called at any time during 
+ * the execution of the application.</p>
+ * 
+ * @author Gavin King
+ * @author Pete Muir
+ * @author Clint Popetz
+ * @author David Allen
  */
-@Singleton
-public class BeanManager {
+public interface BeanManager
+{
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOGGER = Logger.getLogger(BeanManager.class);
+   /**
+    * Obtains a contextual reference for a certain {@linkplain Bean bean} and 
+    * a certain bean type of the bean.
+    * 
+    * @param bean the {@link Bean} object representing the bean
+    * @param beanType a bean type that must be implemented by any client proxy 
+    *           that is returned
+    * @param ctx a {@link javax.enterprise.context.spi.CreationalContext} that 
+    *           may be used to destroy any object with scope 
+    *           {javax.enterprise.context.Dependent} that is created
+    * @return a contextual reference representing the bean
+    * @throws IllegalArgumentException if the given type is not a bean type of
+    *           the given bean
+    */
+   public Object getReference(Bean<?> bean, Type beanType, CreationalContext<?> ctx);
 
-    /**
-     * Built-in beans.
-     */
-    private static Set<Bean<?>> builtInBeans;
+   /**
+    * Obtains an injectable reference for a certain {@linkplain InjectionPoint 
+    * injection point}.
+    * 
+    * @param ij the target injection point
+    * @param ctx a {@link javax.enterprise.context.spi.CreationalContext} that 
+    *           may be used to destroy any object with scope 
+    *           {javax.enterprise.context.Dependent} that is created
+    * @return the injectable reference
+    * @throws UnsatisfiedResolutionException if typesafe resolution results in 
+    *           an unsatisfied dependency
+    * @throws AmbiguousResolutionException typesafe resolution results in an 
+    *           unresolvable ambiguous dependency
+    */
+   public Object getInjectableReference(InjectionPoint ij, CreationalContext<?> ctx);
 
-    /**
-     * Built-in bean classes.
-     */
-    private static List<Class<?>> builtInBeanClasses = Arrays.asList(
-            LangPropsService.class,
-            BeforeRequestProcessAdvice.class,
-            AfterRequestProcessAdvice.class,
-            EventManager.class,
-            PluginManager.class);
+   /**
+    * Obtain an instance of a {@link javax.enterprise.context.spi.CreationalContext} 
+    * for the given {@linkplain javax.enterprise.context.spi.Contextual contextual type}, 
+    * or for a non-contextual object.
+    * 
+    * @param contextual the {@link javax.enterprise.context.spi.Contextual}, or
+    *           a null value in the case of a non-contextual object
+    * @return the new {@link javax.enterprise.context.spi.CreationalContext}
+    */
+   public <T> CreationalContext<T> createCreationalContext(Contextual<T> contextual);
 
-    /**
-     * Configurator.
-     */
-    private Configurator configurator;
+   /**
+    * Return the set of beans which have the given required type and qualifiers 
+    * and are available for injection in the module or library containing the class 
+    * into which the <tt>BeanManager</tt> was injected or the Java EE component from 
+    * whose JNDI environment namespace the <tt>BeanManager</tt> was obtained, 
+    * according to the rules of typesafe resolution. If no qualifiers are given, the 
+    * {@linkplain javax.enterprise.inject.Default default qualifier} is assumed.
+    * 
+    * @param beanType the required bean type
+    * @param qualifiers the required qualifiers
+    * @return the resulting set of {@linkplain Bean beans}
+    * @throws IllegalArgumentException if the given type represents a type
+    *            variable
+    * @throws IllegalArgumentException if two instances of the same qualifier type
+    *            are given
+    * @throws IllegalArgumentException if an instance of an annotation that is
+    *            not a qualifier type is given
+    */
+   public Set<Bean<?>> getBeans(Type beanType, Annotation... qualifiers);
 
-    /**
-     * Beans.
-     */
-    private Set<Bean<?>> beans;
+   /**
+    * Return the set of beans which have the given EL name and are available for 
+    * injection in the module or library containing the class into which the 
+    * <tt>BeanManager</tt> was injected or the Java EE component from whose JNDI 
+    * environment namespace the <tt>BeanManager</tt> was obtained, according to 
+    * the rules of EL name resolution.
+    * 
+    * @param name the EL name
+    * @return the resulting set of {@linkplain Bean beans}
+    */
+   public Set<Bean<?>> getBeans(String name);
 
-    /**
-     * Context.
-     */
-    private SingletonContext context;
+   /**
+    * Returns the {@link javax.enterprise.inject.spi.PassivationCapable} bean with 
+    * the given identifier.
+    * 
+    * @param id the identifier
+    * @return a {@link Bean} that implements 
+    *            {@link javax.enterprise.inject.spi.PassivationCapable}
+    *            and has the given identifier, or a null value if there 
+    *            is no such bean
+    */
+   public Bean<?> getPassivationCapableBean(String id);
 
-    /**
-     * Constructs a Latke bean manager.
-     */
-    private BeanManager() {
-        LOGGER.log(Level.DEBUG, "Creating bean manager");
+   /**
+    * Apply the ambiguous dependency resolution rules to a set of 
+    * {@linkplain Bean beans}.
+    * 
+    * @param <X> a common type of the beans
+    * @param beans a set of {@linkplain Bean beans} of the given type
+    * @throws AmbiguousResolutionException if the ambiguous dependency
+    *            resolution rules fail
+    */
+   public <X> Bean<? extends X> resolve(Set<Bean<? extends X>> beans);
 
-        beans = new HashSet<>();
-        context = new SingletonContext();
-        builtInBeans = new HashSet<>();
-        configurator = new Configurator(this);
-        configurator.createBean(BeanManager.class);
+   /**
+    * Validate a certain {@linkplain InjectionPoint injection point}.
+    * 
+    * @param injectionPoint the {@linkplain InjectionPoint injection point} to 
+    *            validate
+    * @throws InjectionException if there is a deployment problem (for
+    *            example, an unsatisfied or unresolvable ambiguous dependency)
+    *            associated with the injection point
+    */
+   public void validate(InjectionPoint injectionPoint);
 
-        for (final Class<?> builtInBeanClass : builtInBeanClasses) {
-            final Bean<?> builtInBean = configurator.createBean(builtInBeanClass);
-            builtInBeans.add(builtInBean);
-            context.get(builtInBean);
-        }
+   /**
+    * Fire an event and notify observers.
+    * 
+    * @param event the event object
+    * @param qualifiers the event qualifiers
+    * @throws IllegalArgumentException if the runtime type of the event object
+    *            contains a type variable
+    * @throws IllegalArgumentException if two instances of the same qualifier type
+    *            are given
+    * @throws IllegalArgumentException if an instance of an annotation that is not 
+    * a qualifier type is given
+    */
+   public void fireEvent(Object event, Annotation... qualifiers);
 
-        beans.addAll(builtInBeans);
+   /**
+    * Test the given annotation type to determine if it is a
+    * {@linkplain javax.enterprise.context scope type}.
+    * 
+    * @param annotationType the annotation type
+    * @return true if the annotation type is a 
+    *            {@linkplain javax.enterprise.context scope type}
+    */
+   public boolean isScope(Class<? extends Annotation> annotationType);
 
-        LOGGER.log(Level.DEBUG, "Created Latke bean manager");
-    }
+   /**
+    * Test the given annotation type to determine if it is a 
+    * {@linkplain javax.enterprise.context normal scope type}.
+    * 
+    * @param annotationType the annotation type
+    * @return <tt>true</tt> if the annotation type is a
+    *         {@linkplain javax.enterprise.context normal scope type}
+    */
+   public boolean isNormalScope(Class<? extends Annotation> annotationType);
 
-    /**
-     * Starts the application with the specified bean class and bean modules.
-     *
-     * @param classes the specified bean class, nullable
-     */
-    public static void start(final Collection<Class<?>> classes) {
-        LOGGER.log(Level.DEBUG, "Initializing Latke IoC container");
+   /**
+    * Test the given annotation type to determine if it is a passivating
+    * {@linkplain javax.enterprise.context scope type}.
+    * 
+    * @param annotationType the annotation type
+    * @return <tt>true</tt> if the annotation type is a passivating scope type
+    */
+   public boolean isPassivatingScope(Class<? extends Annotation> annotationType);
 
-        final Configurator configurator = getInstance().getConfigurator();
-        if (null != classes && !classes.isEmpty()) {
-            configurator.createBeans(classes);
-        }
+   /**
+    * Test the given annotation type to determine if it is a
+    * {@linkplain javax.inject.Qualifier qualifier type}.
+    * 
+    * @param annotationType the annotation type
+    * @return <tt>true</tt> if the annotation type is a 
+    *            {@linkplain javax.inject.Qualifier qualifier type}
+    */
+   public boolean isQualifier(Class<? extends Annotation> annotationType);
 
-        LOGGER.log(Level.DEBUG, "Initialized Latke IoC container");
-    }
+   /**
+    * Test the given annotation type to determine if it is an
+    * {@linkplain javax.interceptor.InterceptorBinding interceptor binding type}.
+    * 
+    * @param annotationType the annotation to test
+    * @return <tt>true</tt> if the annotation type is a {@linkplain 
+    *            javax.interceptor.InterceptorBinding interceptor binding type} 
+    */
+   public boolean isInterceptorBinding(Class<? extends Annotation> annotationType);
 
-    /**
-     * Ends the application.
-     */
-    public static void close() {
-        LOGGER.log(Level.DEBUG, "Closed Latke IoC container");
-    }
+   /**
+    * Test the given annotation type to determine if it is a
+    * {@linkplain javax.enterprise.inject.Stereotype stereotype}.
+    * 
+    * @param annotationType the annotation type
+    * @return <tt>true</tt> if the annotation type is a
+    *         {@linkplain javax.enterprise.inject.Stereotype stereotype}
+    */
+   public boolean isStereotype(Class<? extends Annotation> annotationType);
 
-    public static BeanManager getInstance() {
-        return BeanManagerHolder.instance;
-    }
+   /**
+    * Obtains the set of meta-annotations for a certain 
+    * {@linkplain javax.interceptor.InterceptorBinding interceptor binding type}.
+    * 
+    * @param bindingType the
+    *           {@linkplain javax.interceptor.InterceptorBinding interceptor binding type}
+    * @return the set of meta-annotations
+    */
+   public Set<Annotation> getInterceptorBindingDefinition(Class<? extends Annotation> bindingType);
 
-    public void addBean(final Bean<?> bean) {
-        beans.add(bean);
-    }
+   /**
+    * Obtains meta-annotations for a certain
+    * {@linkplain javax.enterprise.inject.Stereotype stereotype}.
+    * 
+    * @param stereotype the {@linkplain javax.enterprise.inject.Stereotype
+    *           stereotype}
+    * @return the set of meta-annotations
+    */
+   public Set<Annotation> getStereotypeDefinition(Class<? extends Annotation> stereotype);
 
-    public Set<Bean<?>> getBeans(final Class<? extends Annotation> stereoType) {
-        final Set<Bean<?>> ret = new HashSet<>();
+   /**
+    * Obtains an active {@linkplain javax.enterprise.context.spi.Context
+    * context object} for the given {@linkplain javax.enterprise.context scope}.
+    * 
+    * @param scopeType the {@linkplain javax.enterprise.context scope}
+    * @return the {@linkplain javax.enterprise.context.spi.Context context object}
+    * @throws ContextNotActiveException if there is no active context object for the
+    *            given scope
+    * @throws IllegalArgumentException if there is more than one active context object
+    *            for the given scope
+    */
+   public Context getContext(Class<? extends Annotation> scopeType);
 
-        for (final Bean<?> bean : beans) {
-            final Set<Class<? extends Annotation>> stereotypes = bean.getStereotypes();
+   /**
+    * Obtain an {@link AnnotatedType} that may be used to read the annotations 
+    * of the given class or interface.
+    * 
+    * @param <T> the class or interface
+    * @param type the {@link Class} object
+    * @return the {@link AnnotatedType}
+    */
+   public <T> AnnotatedType<T> createAnnotatedType(Class<T> type);
 
-            if (stereotypes.contains(stereoType)) {
-                ret.add(bean);
-            }
-        }
+   /**
+    * Obtains an {@link InjectionTarget} for the given {@link AnnotatedType}. 
+    * The container ignores the annotations and types declared by the elements 
+    * of the actual Java class and uses the metadata provided via the 
+    * {@link Annotated} interface instead.
+    * 
+    * @param <T> the type
+    * @param type the {@link AnnotatedType}
+    * @returns a container provided implementation of {@link InjectionTarget}
+    * @throws IllegalArgumentException if there is a definition error associated
+    *            with any injection point of the type
+    */
+   public <T> InjectionTarget<T> createInjectionTarget(AnnotatedType<T> type);
 
-        return ret;
-    }
-
-    public <T> Bean<T> getBean(final Class<T> beanClass) {
-        for (final Bean<?> bean : beans) {
-            if (bean.getBeanClass().equals(beanClass)) {
-                return (Bean<T>) bean;
-            }
-        }
-
-        throw new RuntimeException("Can not get bean with class [" + beanClass.getName() + ']');
-    }
-
-    public Configurator getConfigurator() {
-        return configurator;
-    }
-
-    public <T> T getReference(final Bean<T> bean) {
-        return context.get(bean);
-    }
-
-    public Object getInjectableReference(final InjectionPoint ij) {
-        final Type baseType = ij.getAnnotated().getBaseType();
-        final Bean<?> bean = getBean(baseType);
-
-        return getReference(bean);
-    }
-
-    private Bean<?> getBean(final Type beanType) {
-        for (final Bean<?> bean : beans) {
-            if (Reflections.isConcrete(beanType)) {
-                if (bean.getBeanClass().equals(beanType)) {
-                    return bean;
-                }
-            }
-        }
-
-        throw new RuntimeException("Not found bean [beanType=" + beanType + "]");
-    }
-
-    public <T> T getReference(final Class<T> beanClass) {
-        final Bean<T> bean = getBean(beanClass);
-
-        return getReference(bean);
-    }
-
-    /**
-     * Root bean manager holder.
-     */
-    private static final class BeanManagerHolder {
-
-        /**
-         * Singleton of bean manager.
-         */
-        private static BeanManager instance = new BeanManager();
-
-        /**
-         * Private constructor.
-         */
-        private BeanManagerHolder() {
-        }
-    }
 }

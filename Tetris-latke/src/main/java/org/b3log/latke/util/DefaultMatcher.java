@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
  */
 package org.b3log.latke.util;
 
+
 import org.weborganic.furi.URIPattern;
 import org.weborganic.furi.URIResolveResult;
 import org.weborganic.furi.URIResolver;
 
+
 /**
  * the url-match util.
- * <p>
+ * 
  * using https://code.google.com/p/wo-furi/ which is Deprecated.
  *
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
@@ -46,6 +48,5 @@ public final class DefaultMatcher {
     /**
      * Private constructor.
      */
-    private DefaultMatcher() {
-    }
+    private DefaultMatcher() {}
 }

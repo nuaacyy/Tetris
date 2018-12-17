@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package org.b3log.latke.repository;
+
 
 /**
  * Projection.
@@ -45,7 +46,7 @@ public class Projection {
 
     /**
      * Gets the key.
-     *
+     * 
      * @return key
      */
     public String getKey() {
@@ -54,7 +55,7 @@ public class Projection {
 
     /**
      * Gets the value type.
-     *
+     * 
      * @return value type
      */
     public Class<?> getType() {
@@ -63,8 +64,8 @@ public class Projection {
 
     /**
      * Constructs a projection with the specified key and value type.
-     *
-     * @param key  the specified key
+     * 
+     * @param key the specified key
      * @param type the specified value type
      */
     public Projection(final String key, final Class<?> type) {
@@ -74,7 +75,7 @@ public class Projection {
 
     @Override
     public boolean equals(final Object obj) {
-        if (null == obj) {
+        if (obj == null) {
             return false;
         }
 
@@ -84,11 +85,11 @@ public class Projection {
 
         final Projection other = (Projection) obj;
 
-        if ((null == this.key) ? (other.key != null) : !this.key.equals(other.key)) {
+        if ((this.key == null) ? (other.key != null) : !this.key.equals(other.key)) {
             return false;
         }
 
-        if (this.type != other.type && (null == this.type || !this.type.equals(other.type))) {
+        if (this.type != other.type && (this.type == null || !this.type.equals(other.type))) {
             return false;
         }
 

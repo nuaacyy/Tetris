@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,21 @@ package org.b3log.latke.ioc.annotated;
 import java.lang.reflect.Field;
 
 /**
- * Represents a field of a Java class.
+ * <p>Represents a field of a Java class.</p>
+ * 
+ * @author Gavin King
+ * @author Pete Muir
  *
  * @param <X> the declaring type
- * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.1, Sep 29, 2018
- * @since 2.4.18
+ * @see Field
  */
-public interface AnnotatedField<X> extends AnnotatedType<X> {
+public interface AnnotatedField<X> extends AnnotatedMember<X> {
 
-    /**
-     * Get the underlying {@link Field}.
-     *
-     * @return the {@link Field}
-     */
-    Field getJavaMember();
+   /**
+    * <p>Get the underlying {@link Field}.</p>
+    * 
+    * @return the {@link Field}
+    */
+   public Field getJavaMember();
+
 }

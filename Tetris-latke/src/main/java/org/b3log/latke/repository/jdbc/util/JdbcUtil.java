@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.1.2.7, Jun 5, 2018
+ * @version 1.1.2.5, Oct 17, 2017
  */
 public final class JdbcUtil {
 
@@ -53,14 +53,11 @@ public final class JdbcUtil {
      *
      * @param sql        the specified SQL
      * @param connection connection the specified connection
-     * @param isDebug    the specified debug flag
      * @return {@code true} if success, returns {@false} otherwise
      * @throws SQLException SQLException
      */
-    public static boolean executeSql(final String sql, final Connection connection, final boolean isDebug) throws SQLException {
-        if (isDebug || LOGGER.isTraceEnabled()) {
-            LOGGER.log(Level.INFO, "Executing SQL [" + sql + "]");
-        }
+    public static boolean executeSql(final String sql, final Connection connection) throws SQLException {
+        LOGGER.log(Level.TRACE, "executeSql: {0}", sql);
 
         final Statement statement = connection.createStatement();
         final boolean isSuccess = !statement.execute(sql);
@@ -75,14 +72,11 @@ public final class JdbcUtil {
      * @param sql        the specified SQL
      * @param paramList  the specified params
      * @param connection the specified connection
-     * @param isDebug    the specified debug flag
      * @return {@code true} if success, returns {@false} otherwise
      * @throws SQLException SQLException
      */
-    public static boolean executeSql(final String sql, final List<Object> paramList, final Connection connection, final boolean isDebug) throws SQLException {
-        if (isDebug || LOGGER.isTraceEnabled()) {
-            LOGGER.log(Level.INFO, "Executing SQL [" + sql + "]");
-        }
+    public static boolean executeSql(final String sql, final List<Object> paramList, final Connection connection) throws SQLException {
+        LOGGER.log(Level.TRACE, "Execute SQL [{0}]", sql);
 
         final PreparedStatement preparedStatement = connection.prepareStatement(sql);
         for (int i = 1; i <= paramList.size(); i++) {
@@ -101,15 +95,14 @@ public final class JdbcUtil {
      * @param paramList  paramList
      * @param connection connection
      * @param tableName  tableName
-     * @param isDebug    the specified debug flag
      * @return JSONObject only one record.
      * @throws SQLException        SQLException
      * @throws JSONException       JSONException
      * @throws RepositoryException repositoryException
      */
     public static JSONObject queryJsonObject(final String sql, final List<Object> paramList, final Connection connection,
-                                             final String tableName, final boolean isDebug) throws SQLException, JSONException, RepositoryException {
-        return queryJson(sql, paramList, connection, true, tableName, isDebug);
+                                             final String tableName) throws SQLException, JSONException, RepositoryException {
+        return queryJson(sql, paramList, connection, true, tableName);
     }
 
     /**
@@ -119,15 +112,14 @@ public final class JdbcUtil {
      * @param paramList  paramList
      * @param connection connection
      * @param tableName  tableName
-     * @param isDebug    the specified debug flag
      * @return JSONArray
      * @throws SQLException        SQLException
      * @throws JSONException       JSONException
      * @throws RepositoryException repositoryException
      */
     public static JSONArray queryJsonArray(final String sql, final List<Object> paramList, final Connection connection,
-                                           final String tableName, final boolean isDebug) throws SQLException, JSONException, RepositoryException {
-        final JSONObject jsonObject = queryJson(sql, paramList, connection, false, tableName, isDebug);
+                                           final String tableName) throws SQLException, JSONException, RepositoryException {
+        final JSONObject jsonObject = queryJson(sql, paramList, connection, false, tableName);
 
         return jsonObject.getJSONArray(Keys.RESULTS);
     }
@@ -138,17 +130,14 @@ public final class JdbcUtil {
      * @param connection connection
      * @param ifOnlyOne  ifOnlyOne to determine return object or array.
      * @param tableName  tableName
-     * @param isDebug    the specified debug flag
      * @return JSONObject
      * @throws SQLException        SQLException
      * @throws JSONException       JSONException
      * @throws RepositoryException respsitoryException
      */
     private static JSONObject queryJson(final String sql, final List<Object> paramList, final Connection connection,
-                                        final boolean ifOnlyOne, final String tableName, final boolean isDebug) throws SQLException, JSONException, RepositoryException {
-        if (isDebug || LOGGER.isTraceEnabled()) {
-            LOGGER.log(Level.INFO, "Executing SQL [" + sql + "]");
-        }
+                                        final boolean ifOnlyOne, final String tableName) throws SQLException, JSONException, RepositoryException {
+        LOGGER.log(Level.TRACE, "Query SQL [{0}]", sql);
 
         final PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
@@ -180,13 +169,15 @@ public final class JdbcUtil {
             throws SQLException, JSONException, RepositoryException {
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
 
-        final List<FieldDefinition> definitionList = JdbcRepositories.getKeys(tableName);
-        if (null == definitionList) {
+        final List<FieldDefinition> definitionList = JdbcRepositories.getRepositoriesMap().get(tableName);
+
+        if (definitionList == null) {
             LOGGER.log(Level.ERROR, "resultSetToJsonObject: null definitionList finded for table  {0}", tableName);
             throw new RepositoryException("resultSetToJsonObject: null definitionList finded for table  " + tableName);
         }
 
-        final Map<String, FieldDefinition> dMap = new HashMap<>();
+        final Map<String, FieldDefinition> dMap = new HashMap<String, FieldDefinition>();
+
         for (FieldDefinition fieldDefinition : definitionList) {
             if (Latkes.RuntimeDatabase.H2 == Latkes.getRuntimeDatabase() || Latkes.RuntimeDatabase.ORACLE == Latkes.getRuntimeDatabase()) {
                 dMap.put(fieldDefinition.getName().toUpperCase(), fieldDefinition);
@@ -209,7 +200,7 @@ public final class JdbcUtil {
 
                 final FieldDefinition definition = dMap.get(columnName);
 
-                if (null == definition) { // COUNT(OID)
+                if (definition == null) { // COUNT(OID)
                     jsonObject.put(columnName, resultSet.getObject(columnName));
                 } else if ("boolean".equals(definition.getType())) {
                     jsonObject.put(definition.getName(), resultSet.getBoolean(columnName));

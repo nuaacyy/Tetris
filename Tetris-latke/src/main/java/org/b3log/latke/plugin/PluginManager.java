@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,15 @@ import org.b3log.latke.event.AbstractEventListener;
 import org.b3log.latke.event.Event;
 import org.b3log.latke.event.EventException;
 import org.b3log.latke.event.EventManager;
-import org.b3log.latke.ioc.Inject;
-import org.b3log.latke.ioc.Singleton;
+import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.inject.Named;
+import org.b3log.latke.ioc.inject.Singleton;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Plugin;
 import org.b3log.latke.servlet.AbstractServletListener;
 import org.b3log.latke.util.Stopwatchs;
+import org.b3log.latke.util.Strings;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +49,7 @@ import java.util.*;
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @version 1.0.2.3, Sep 8, 2017
  */
+@Named("LatkeBuiltInPluginManager")
 @Singleton
 public class PluginManager {
 
@@ -300,7 +303,7 @@ public class PluginManager {
         final String[] eventListenerClassArray = eventListenerClasses.split(",");
 
         for (final String eventListenerClassName : eventListenerClassArray) {
-            if (StringUtils.isBlank(eventListenerClassName)) {
+            if (Strings.isEmptyOrNull(eventListenerClassName)) {
                 LOGGER.log(Level.INFO, "No event listener to load for plugin[name={0}]", plugin.getName());
                 return;
             }

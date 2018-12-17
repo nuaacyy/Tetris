@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
  */
 package org.b3log.latke.util;
 
+
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 
+
 /**
  * Call stack utilities.
- *
+ * 
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @version 1.0.0.4, Apr 11, 2012
  */
@@ -34,8 +36,8 @@ public final class Callstacks {
 
     /**
      * Checks the current method is whether invoked by a caller specified by the given class name and method name.
-     *
-     * @param className  the given class name
+     * 
+     * @param className the given class name
      * @param methodName the given method name, "*" for matching all methods
      * @return {@code true} if it is invoked by the specified caller, returns {@code false} otherwise
      */
@@ -62,12 +64,12 @@ public final class Callstacks {
 
     /**
      * Prints call stack with the specified logging level.
-     *
-     * @param logLevel           the specified logging level
-     * @param carePackages       the specified packages to print, for example, ["org.b3log.latke", "org.b3log.solo"], {@code null} to care
-     *                           nothing
-     * @param exceptablePackages the specified packages to skip, for example, ["com.sun", "java.io", "org.b3log.solo.filter"],
-     *                           {@code null} to skip nothing
+     * 
+     * @param logLevel the specified logging level
+     * @param carePackages the specified packages to print, for example, ["org.b3log.latke", "org.b3log.solo"], {@code null} to care 
+     * nothing
+     * @param exceptablePackages the specified packages to skip, for example, ["com.sun", "java.io", "org.b3log.solo.filter"], 
+     * {@code null} to skip nothing
      */
     public static void printCallstack(final Level logLevel, final String[] carePackages, final String[] exceptablePackages) {
         if (null == logLevel) {
@@ -91,12 +93,12 @@ public final class Callstacks {
             final String stackElemClassName = stackElements[i].getClassName();
 
             if (!StringUtils.startsWithAny(stackElemClassName, carePackages)
-                    || StringUtils.startsWithAny(stackElemClassName, exceptablePackages)) {
+                || StringUtils.startsWithAny(stackElemClassName, exceptablePackages)) {
                 continue;
             }
 
             stackBuilder.append("    [className=").append(stackElements[i].getClassName()).append(", fileName=").append(stackElements[i].getFileName()).append(", lineNumber=").append(stackElements[i].getLineNumber()).append(", methodName=").append(stackElements[i].getMethodName()).append(']').append(
-                    Strings.LINE_SEPARATOR);
+                Strings.LINE_SEPARATOR);
         }
         stackBuilder.append("], full depth [").append(stackElements.length).append("]");
 
@@ -106,6 +108,5 @@ public final class Callstacks {
     /**
      * Private constructor.
      */
-    private Callstacks() {
-    }
+    private Callstacks() {}
 }

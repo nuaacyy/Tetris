@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,44 @@ package org.b3log.latke.ioc.annotated;
 import java.util.Set;
 
 /**
- * Represents a Java class or interface.
+ * <p>Represents a Java class or interface.</p>
+ *
+ * @author Gavin King
+ * @author Pete Muir
  *
  * @param <X> the type
- * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.1, Sep 29, 2018
- * @since 2.4.18
+ * @see Class
  */
-public interface AnnotatedType<X> extends Annotated {
+public interface AnnotatedType<X> extends Annotated
+{
 
     /**
-     * Get the {@linkplain AnnotatedField fields} of the type.
+     * <p>Get the underlying {@link Class}.</p>
+     *
+     * @return the {@link Class}
+     */
+    public Class<X> getJavaClass();
+
+    /**
+     * <p>Get the {@linkplain AnnotatedConstructor constructors} of the type.
+     * If an empty set is returned, a default constructor with no parameters
+     * will be assumed.</p>
+     *
+     * @return the constructors, or an empty set if none are defined
+     */
+    public Set<AnnotatedConstructor<X>> getConstructors();
+
+    /**
+     * <p>Get the {@linkplain AnnotatedMethod methods} of the type.</p>
+     *
+     * @return the methods, or an empty set if none are defined
+     */
+    public Set<AnnotatedMethod<? super X>> getMethods();
+
+    /**
+     * <p>Get the {@linkplain AnnotatedField fields} of the type.<p>
      *
      * @return the fields, or an empty set if none are defined
      */
-    Set<AnnotatedField<? super X>> getFields();
+    public Set<AnnotatedField<? super X>> getFields();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, b3log.org & hacpai.com
+ * Copyright (c) 2009-2017, b3log.org & hacpai.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,21 @@
  */
 package org.b3log.latke.cron;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.b3log.latke.Latkes;
-import org.b3log.latke.logging.Level;
-import org.b3log.latke.logging.Logger;
-
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.TimerTask;
+import org.apache.commons.lang.StringUtils;
+import org.b3log.latke.logging.Level;
+import org.b3log.latke.logging.Logger;
+import org.b3log.latke.servlet.HTTPRequestMethod;
+import org.b3log.latke.urlfetch.HTTPRequest;
+import org.b3log.latke.urlfetch.URLFetchService;
+import org.b3log.latke.urlfetch.URLFetchServiceFactory;
 
 /**
  * A cron job is a scheduled task, it will invoke {@link #url a URL} via an HTTP GET request, at a given time of day.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.1.0.0, Sep 24, 2018
+ * @version 2.0.1.0, Dec 23, 2015
  */
 public final class Cron extends TimerTask {
 
@@ -38,6 +37,21 @@ public final class Cron extends TimerTask {
      * Logger.
      */
     private static final Logger LOGGER = Logger.getLogger(Cron.class);
+
+    /**
+     * Time unit constant - 10.
+     */
+    public static final int TEN = 10;
+
+    /**
+     * Time unit constant - 60.
+     */
+    public static final int SIXTY = 60;
+
+    /**
+     * Time unit constant - 1000.
+     */
+    public static final int THOUSAND = 1000;
 
     /**
      * The URL this cron job to invoke.
@@ -69,74 +83,37 @@ public final class Cron extends TimerTask {
     private long period;
 
     /**
-     * Timeout of this cron job executing in milliseconds.
-     */
-    private int timeout;
-
-    /**
-     * Delay of this cron job the first executing in milliseconds.
-     */
-    private long delay;
-
-    /**
-     * Logging level.
-     */
-    private Level loggingLevel;
-
-    /**
-     * Count of executions.
-     */
-    private long execCount;
-
-    /**
-     * Count of successful executions.
-     */
-    private long execSuccCount;
-
-    /**
-     * Constructs a cron job with the specified URL, description, schedule, timeout, delay and logging level.
+     * Constructs a cron job with the specified URL, description and schedule.
      *
-     * @param url          the specified URL
-     * @param description  the specified description
-     * @param schedule     the specified schedule
-     * @param timeout      the specified timeout
-     * @param delay        the specified delay
-     * @param loggingLevel the specified logging level
+     * @param url the specified URL
+     * @param description the specified description
+     * @param schedule the specified schedule
      */
-    public Cron(final String url, final String description, final String schedule, final int timeout, final long delay, final Level loggingLevel) {
+    public Cron(final String url, final String description, final String schedule) {
         this.url = url;
         this.description = description;
         this.schedule = schedule;
-        this.timeout = timeout;
-        this.delay = delay;
-        this.loggingLevel = loggingLevel;
 
         parse(schedule);
     }
 
     @Override
     public void run() {
+        LOGGER.debug("Executing scheduled task....");
+
+        final URLFetchService urlFetchService = URLFetchServiceFactory.getURLFetchService();
+
+        final HTTPRequest request = new HTTPRequest();
+
         try {
-            LOGGER.log(loggingLevel, "Executing scheduled task....");
+            request.setURL(new URL(url));
+            request.setRequestMethod(HTTPRequestMethod.GET);
+            urlFetchService.fetchAsync(request);
 
-            final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setConnectTimeout(timeout);
-            conn.setReadTimeout(timeout);
-            conn.setRequestProperty("User-Agent", Latkes.USER_AGENT);
-            String content;
-            try (final InputStream is = conn.getInputStream()) {
-                content = IOUtils.toString(is, "UTF-8");
-            }
-            conn.disconnect();
-
-            LOGGER.log(loggingLevel, "Executed scheduled task [url=" + url + ", response=" + content + "]");
-            execSuccCount++;
+            LOGGER.log(Level.DEBUG, "Executed scheduled task[url={0}]", url);
         } catch (final Exception e) {
-            if (1 < execCount) {
-                LOGGER.log(Level.ERROR, "Scheduled task execute failed [" + url + ", timeout=" + timeout + "]", e);
-            }
-        } finally {
-            execCount++;
+            LOGGER.log(Level.ERROR, "Scheduled task execute failed", e);
+
         }
     }
 
@@ -153,11 +130,11 @@ public final class Cron extends TimerTask {
                 new Object[]{schedule, num, timeUnit, description});
 
         if ("hours".equals(timeUnit)) {
-            period = num * 60 * 60 * 1000;
+            period = num * SIXTY * SIXTY * THOUSAND;
         } else if ("minutes".equals(timeUnit)) {
-            period = num * 60 * 1000;
+            period = num * SIXTY * THOUSAND;
         } else if ("seconds".equals(timeUnit)) {
-            period = num * 1000;
+            period = num * THOUSAND;
         }
     }
 
@@ -204,59 +181,5 @@ public final class Cron extends TimerTask {
      */
     public void setURL(final String url) {
         this.url = url;
-    }
-
-    /**
-     * Gets the timeout.
-     *
-     * @return timeout
-     */
-    public int getTimeout() {
-        return timeout;
-    }
-
-    /**
-     * Sets the timeout with the specified timeout.
-     *
-     * @param timeout the specified timeout
-     */
-    public void setTimeout(final int timeout) {
-        this.timeout = timeout;
-    }
-
-    /**
-     * Gets the delay.
-     *
-     * @return delay
-     */
-    public long getDelay() {
-        return delay;
-    }
-
-    /**
-     * Sets the delay with the specified delay.
-     *
-     * @param delay the specified delay
-     */
-    public void setDelay(final long delay) {
-        this.delay = delay;
-    }
-
-    /**
-     * Gets the count of executions.
-     *
-     * @return count of executions
-     */
-    public long getExecCount() {
-        return execCount;
-    }
-
-    /**
-     * Gets the count of successful executions.
-     *
-     * @return count of successful executions
-     */
-    public long getExecSuccCount() {
-        return execSuccCount;
     }
 }
